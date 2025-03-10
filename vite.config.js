@@ -8,7 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+    },
+    extensions: ['.js', '.vue', '.json']
   },
   server: {
     port: 5173,
@@ -20,9 +21,5 @@ export default defineConfig({
     assetsDir: 'assets',
     minify: 'terser',
     sourcemap: false
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom'
   }
 })

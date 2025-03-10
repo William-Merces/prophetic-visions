@@ -1,46 +1,54 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <div class="app">
+    <TheHeader />
+    <main class="content">
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
+    <TheFooter />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<script>
+import TheHeader from '@/components/layout/TheHeader.vue'
+import TheFooter from '@/components/layout/TheFooter.vue'
+
+export default {
+  name: 'App',
+  components: {
+    TheHeader,
+    TheFooter
+  }
+}
+</script>
+
+<style>
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
-nav {
+.content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
   width: 100%;
-  font-size: 16px;
-  text-align: center;
-  margin-bottom: 2rem;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-radius: 4px;
-  margin: 0 0.5rem;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-nav a.router-link-exact-active {
-  color: #42b983;
-  font-weight: bold;
-}
-
-.wrapper {
-  padding: 1rem;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
