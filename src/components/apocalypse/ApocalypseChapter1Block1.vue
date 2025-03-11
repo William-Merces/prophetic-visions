@@ -1,27 +1,53 @@
 <template>
-  <div class="apocalypse-chapter">
-    <!-- Bloco 1: Contexto Histórico -->
-    <ImersiveNarrative
-      v-if="currentBlock === 1"
-      :slides="contextSlides"
-      blockTitle="Nos Passos de João"
-      @complete="completeBlock(1)"
-    />
-
-    <!-- Botão para avançar para o próximo bloco (após completar o bloco atual) -->
-    <div v-if="blockCompleted && !showNextBlock" class="block-completed">
-      <h3>Bloco Concluído</h3>
-      <button class="btn btn-secondary" @click="showNextBlock = true">
-        Continuar para o próximo bloco
-      </button>
+  <div class="history-context-block">
+    <!-- Cabeçalho do bloco -->
+    <div class="block-header">
+      <h3 class="block-title">Nos Passos de João</h3>
+      <p class="block-subtitle">O contexto histórico da revelação</p>
     </div>
 
-    <!-- Mensagem temporária para os próximos blocos (a serem implementados) -->
-    <div v-if="showNextBlock" class="next-block-preview">
-      <h3>Próximo Bloco: A Experiência da Visão</h3>
-      <p>Este bloco está em desenvolvimento e estará disponível em breve.</p>
-      <p>Aqui você experimentará a visão como se fosse João, com uma narrativa imersiva e imagens detalhadas da visão do Filho do Homem em Apocalipse 1.</p>
-      <button class="btn" @click="resetExperience">Voltar ao início</button>
+    <!-- Experiência imersiva narrativa -->
+    <ImersiveNarrative
+      :slides="contextSlides"
+      :typing-speed="40"
+      :auto-start-typing="true"
+      @complete="narrativeCompleted = true"
+    />
+
+    <!-- Seção de reflexão após completar a narrativa -->
+    <div v-if="narrativeCompleted" class="reflection-section">
+      <h4 class="reflection-title">Reflexão Histórica</h4>
+
+      <div class="reflection-questions">
+        <div class="question-card">
+          <h5>O Império e a Igreja</h5>
+          <p>A igreja primitiva enfrentou severa perseguição sob o Império Romano. Como o contexto político do primeiro século moldou a forma e o conteúdo da revelação dada a João?</p>
+        </div>
+
+        <div class="question-card">
+          <h5>Exílio e Revelação</h5>
+          <p>João estava exilado em Patmos quando recebeu esta visão. De que maneira o isolamento pode ter preparado João para receber uma revelação tão profunda? O que isso nos ensina sobre momentos de isolamento em nossa própria vida espiritual?</p>
+        </div>
+
+        <div class="question-card">
+          <h5>O Dia do Senhor</h5>
+          <p>João especifica que estava "em espírito, no dia do Senhor" quando teve esta visão. Qual é o significado do "dia do Senhor" para a igreja primitiva e como isso contextualizaria esta experiência para os primeiros leitores?</p>
+        </div>
+      </div>
+
+      <div class="historical-insights">
+        <h4>Contexto Adicional</h4>
+        <p>O imperador Domiciano (81-96 d.C.) intensificou a perseguição aos cristãos, exigindo ser adorado como "Dominus et Deus" (Senhor e Deus). Recusar-se a participar do culto imperial poderia resultar em execução.</p>
+        <p>As sete igrejas mencionadas no Apocalipse estavam localizadas na província romana da Ásia (atual Turquia ocidental), um centro de culto imperial onde os cristãos enfrentavam pressão constante para comprometer sua fé.</p>
+        <p>Patmos, uma pequena ilha rochosa no Mar Egeu, era usada pelos romanos como local de banimento para prisioneiros políticos. Foi neste ambiente hostil que João recebeu a maior visão de esperança já registrada.</p>
+      </div>
+
+      <!-- Botão para completar o bloco -->
+      <div class="completion-actions">
+        <button class="btn btn-secondary" @click="completeBlock">
+          Concluir e Continuar <span class="btn-icon">→</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -36,10 +62,8 @@ export default {
   },
   data() {
     return {
-      currentBlock: 1,
-      blockCompleted: false,
-      showNextBlock: false,
-      // Dados do Bloco 1: Contexto Histórico
+      narrativeCompleted: false,
+      // Dados para a narrativa imersiva
       contextSlides: [
         {
           title: "Roma, 95 d.C.",
@@ -103,68 +127,168 @@ export default {
     }
   },
   methods: {
-    completeBlock(blockNumber) {
-      console.log(`Bloco ${blockNumber} concluído`)
-      this.blockCompleted = true
-    },
-
-    resetExperience() {
-      this.currentBlock = 1
-      this.blockCompleted = false
-      this.showNextBlock = false
+    completeBlock() {
+      // Emitir evento para indicar que o bloco foi concluído
+      this.$emit('complete', 1);
     }
   }
 }
 </script>
 
 <style scoped>
-.apocalypse-chapter {
+.history-context-block {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-.block-completed,
-.next-block-preview {
-  text-align: center;
-  padding: 3rem;
-  margin: 2rem auto;
-  max-width: 800px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-lg);
   animation: fadeIn 1s ease;
 }
 
-.next-block-preview h3 {
+.block-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.block-title {
+  font-size: 2rem;
   color: var(--color-secondary);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-xs);
 }
 
-.next-block-preview p {
-  margin-bottom: 1rem;
-  line-height: 1.7;
+.block-subtitle {
   color: var(--color-text-muted);
+  font-size: 1.1rem;
+  font-style: italic;
+  font-family: var(--font-family-quote);
 }
 
-.next-block-preview .btn {
-  margin-top: 1.5rem;
+/* Seção de reflexão */
+.reflection-section {
+  margin-top: var(--space-xxl);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.8s ease;
+}
+
+.reflection-title {
+  text-align: center;
+  color: var(--color-secondary);
+  font-size: 1.5rem;
+  margin-bottom: var(--space-lg);
+  position: relative;
+}
+
+.reflection-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background-color: var(--color-secondary);
+}
+
+.reflection-questions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.question-card {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border-left: 3px solid var(--color-primary);
+}
+
+.question-card h5 {
+  color: var(--color-secondary-light);
+  margin-bottom: var(--space-md);
+  font-size: 1.1rem;
+}
+
+.question-card p {
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.historical-insights {
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  background-color: rgba(75, 46, 131, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(75, 46, 131, 0.3);
+}
+
+.historical-insights h4 {
+  color: var(--color-secondary-light);
+  margin-bottom: var(--space-md);
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.historical-insights p {
+  margin-bottom: var(--space-md);
+  line-height: 1.7;
+}
+
+.completion-actions {
+  margin-top: var(--space-xl);
+  text-align: center;
+}
+
+.btn-secondary {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  transition: transform var(--transition-fast);
+}
+
+.btn-secondary:hover .btn-icon {
+  transform: translateX(5px);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Responsividade */
 @media (max-width: 768px) {
-  .apocalypse-chapter {
-    padding: 1rem 0.5rem;
+  .block-title {
+    font-size: 1.5rem;
   }
 
-  .block-completed,
-  .next-block-preview {
-    padding: 1.5rem;
+  .reflection-section {
+    padding: var(--space-md);
+  }
+
+  .reflection-questions {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .historical-insights {
+    padding: var(--space-md);
+  }
+
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

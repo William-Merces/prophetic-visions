@@ -6,52 +6,83 @@
 
     <!-- Cabeçalho da experiência -->
     <div class="experience-header">
-      <h1>Experiência Imersiva</h1>
-      <h2 class="experience-subtitle">Apocalipse: Uma Jornada Visual</h2>
+      <h1>Apocalipse</h1>
+      <h2 class="experience-subtitle">Uma Jornada Visual pela Revelação</h2>
     </div>
 
-    <!-- Seletor de capítulos -->
-    <div class="chapter-selector">
-      <div class="selector-label">Selecione um capítulo:</div>
-      <div class="chapter-cards">
+    <!-- Lista de capítulos -->
+    <div v-if="!currentChapter" class="chapters-container">
+      <h3 class="chapters-title">Escolha um capítulo:</h3>
+
+      <div class="chapters-grid">
         <div
-          v-for="chapter in availableChapters"
-          :key="chapter.id"
+          v-for="chapterNum in 22"
+          :key="chapterNum"
           class="chapter-card"
-          :class="{ 'active': currentChapter === chapter.id }"
-          @click="selectChapter(chapter.id)"
+          :class="{ 'available': isChapterAvailable(chapterNum) }"
         >
-          <div class="chapter-number">{{ chapter.id }}</div>
-          <div class="chapter-info">
-            <h3 class="chapter-title">{{ chapter.title }}</h3>
-            <p class="chapter-desc">{{ chapter.description }}</p>
+          <div class="chapter-content">
+            <div class="chapter-number">{{ chapterNum }}</div>
+            <h4 class="chapter-title">{{ getChapterTitle(chapterNum) }}</h4>
+
+            <div v-if="isChapterAvailable(chapterNum)" class="chapter-status available">
+              Disponível
+            </div>
+            <div v-else class="chapter-status locked">
+              <span class="lock-icon">🔒</span> Em breve
+            </div>
+
+            <button
+              v-if="isChapterAvailable(chapterNum)"
+              @click="selectChapter(chapterNum)"
+              class="btn chapter-btn"
+            >
+              Explorar Capítulo
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Conteúdo do capítulo atual -->
-    <div v-if="currentChapter" class="chapter-content">
-      <ApocalypseChapter1 v-if="currentChapter === 1" />
+    <div v-if="currentChapter" class="chapter-content-view">
+      <div class="chapter-header">
+        <button class="btn back-btn" @click="returnToChapters">
+          <span class="back-arrow">←</span> Voltar para capítulos
+        </button>
+        <h3 class="current-chapter-title">
+          Capítulo {{ currentChapter }}: {{ getChapterTitle(currentChapter) }}
+        </h3>
+      </div>
 
-      <!-- Placeholder para capítulos futuros -->
+      <div class="chapter-intro">
+        <h2 class="chapter-intro-title">A Visão do Filho do Homem</h2>
+        <p class="chapter-intro-description">
+          Explore a primeira visão do Apocalipse, onde João vê Cristo glorificado caminhando entre sete candeeiros de ouro.
+        </p>
+      </div>
+
+      <!-- Renderiza o capítulo 1 usando o componente específico -->
+      <ApocalypseChapter1 v-if="currentChapter === 1" @complete="chapterCompleted" />
+
+      <!-- Placeholder para outros capítulos -->
       <div v-else class="chapter-placeholder">
-        <h3>Capítulo {{ currentChapter }} - {{ getCurrentChapterTitle }}</h3>
-        <p>Este capítulo está em desenvolvimento e estará disponível em breve.</p>
-        <button class="btn" @click="currentChapter = 1">Voltar para Capítulo 1</button>
+        <div class="placeholder-content">
+          <div class="placeholder-icon">🔒</div>
+          <h3>Capítulo {{ currentChapter }}</h3>
+          <p>Este capítulo estará disponível em breve.</p>
+          <p class="placeholder-message">Comece sua jornada pelo Capítulo 1 para desbloquear o conteúdo posterior.</p>
+          <button class="btn" @click="selectChapter(1)">Ir para o Capítulo 1</button>
+        </div>
       </div>
     </div>
 
-    <!-- Rodapé da experiência -->
-    <div class="experience-footer">
+    <!-- Rodapé informativo -->
+    <div class="experience-footer" v-if="!currentChapter">
       <p>
-        Explore a revelação dada a João através desta experiência imersiva.
-        Cada capítulo é organizado em quatro blocos para proporcionar uma compreensão
-        mais profunda das visões apocalípticas.
+        "Bem-aventurado aquele que lê, e os que ouvem as palavras desta profecia, e guardam as coisas que nela estão escritas; porque o tempo está próximo."
+        <span class="verse-ref">Apocalipse 1:3</span>
       </p>
-      <div class="footer-actions">
-        <router-link to="/" class="btn">Voltar para o Início</router-link>
-      </div>
     </div>
   </div>
 </template>
@@ -66,81 +97,107 @@ export default {
   },
   data() {
     return {
-      currentChapter: 1,
-      availableChapters: [
-        {
-          id: 1,
-          title: "A Visão do Filho do Homem",
-          description: "João vê Cristo glorificado entre sete candeeiros de ouro."
-        },
-        {
-          id: 4,
-          title: "O Trono Celestial",
-          description: "Uma porta aberta no céu revela o trono de Deus e os 24 anciãos."
-        },
-        {
-          id: 5,
-          title: "O Cordeiro e o Livro Selado",
-          description: "Apenas o Cordeiro que foi morto é digno de abrir o livro selado."
-        },
-        {
-          id: 6,
-          title: "Os Seis Primeiros Selos",
-          description: "A abertura dos selos revela os quatro cavaleiros e julgamentos divinos."
-        }
-      ]
-    }
-  },
-  computed: {
-    getCurrentChapterTitle() {
-      const chapter = this.availableChapters.find(ch => ch.id === this.currentChapter)
-      return chapter ? chapter.title : ""
+      currentChapter: null,
+      chapterTitles: {
+        1: "A Visão do Filho do Homem",
+        2: "Mensagens às Igrejas de Éfeso e Esmirna",
+        3: "Mensagens às Igrejas de Pérgamo, Tiatira, Sardes, Filadélfia e Laodiceia",
+        4: "O Trono de Deus",
+        5: "O Cordeiro e o Livro Selado",
+        6: "Os Seis Primeiros Selos",
+        7: "Os 144.000 Selados",
+        8: "O Sétimo Selo e as Quatro Primeiras Trombetas",
+        9: "A Quinta e Sexta Trombetas",
+        10: "O Anjo e o Livrinho",
+        11: "As Duas Testemunhas e a Sétima Trombeta",
+        12: "A Mulher e o Dragão",
+        13: "As Duas Bestas",
+        14: "O Cordeiro e os 144.000",
+        15: "Os Sete Anjos com as Últimas Pragas",
+        16: "As Sete Taças da Ira de Deus",
+        17: "A Grande Prostituta e a Besta",
+        18: "A Queda da Babilônia",
+        19: "A Volta de Cristo",
+        20: "O Milênio e o Juízo Final",
+        21: "A Nova Jerusalém",
+        22: "O Rio da Vida e a Última Mensagem"
+      }
     }
   },
   methods: {
-    selectChapter(chapterId) {
-      this.currentChapter = chapterId
-      // Rolar para o topo quando mudar de capítulo
-      window.scrollTo(0, 0)
+    isChapterAvailable(chapterNum) {
+      // Apenas o capítulo 1 está disponível inicialmente
+      return chapterNum === 1;
+    },
+
+    getChapterTitle(chapterNum) {
+      return this.chapterTitles[chapterNum] || `Capítulo ${chapterNum}`;
+    },
+
+    selectChapter(chapterNum) {
+      if (this.isChapterAvailable(chapterNum)) {
+        this.currentChapter = chapterNum;
+
+        // Rolagem suave para o topo da página
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    },
+
+    returnToChapters() {
+      this.currentChapter = null;
+
+      // Rolagem suave para o topo da página
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    },
+
+    chapterCompleted() {
+      alert('Capítulo concluído! Em breve mais capítulos serão liberados.');
+      this.returnToChapters();
     },
 
     createStars() {
-      const starsContainer = document.querySelector('.stars-container')
-      if (!starsContainer) return
+      const starsContainer = document.querySelector('.stars-container');
+      if (!starsContainer) return;
 
-      const starCount = 100
+      const starCount = 100;
 
       for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div')
-        star.classList.add('star')
+        const star = document.createElement('div');
+        star.classList.add('star');
 
         // Posicionar aleatoriamente
-        const x = Math.random() * 100
-        const y = Math.random() * 100
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
 
         // Tamanho aleatório
-        const size = Math.random() * 2 + 1
+        const size = Math.random() * 2 + 1;
 
         // Tempo de animação aleatório
-        const duration = Math.random() * 3 + 2
+        const duration = Math.random() * 3 + 2;
 
-        star.style.left = `${x}%`
-        star.style.top = `${y}%`
-        star.style.width = `${size}px`
-        star.style.height = `${size}px`
-        star.style.animationDuration = `${duration}s`
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.animationDuration = `${duration}s`;
 
-        starsContainer.appendChild(star)
+        starsContainer.appendChild(star);
       }
     }
   },
   mounted() {
-    this.createStars()
+    this.createStars();
 
     // Verificar se há um parâmetro na URL para o capítulo
-    const chapterId = parseInt(this.$route.params.chapter)
-    if (chapterId && this.availableChapters.some(ch => ch.id === chapterId)) {
-      this.selectChapter(chapterId)
+    const chapterParam = parseInt(this.$route.params.chapter);
+    if (chapterParam && this.isChapterAvailable(chapterParam)) {
+      this.selectChapter(chapterParam);
     }
   }
 }
@@ -152,6 +209,7 @@ export default {
   margin: 0 auto;
   padding: 2rem 1rem;
   position: relative;
+  min-height: 100vh;
 }
 
 .stars-container {
@@ -173,170 +231,322 @@ export default {
 }
 
 @keyframes twinkle {
-  0% {
-    opacity: 0.2;
-  }
-  100% {
-    opacity: 0.8;
-  }
+  0% { opacity: 0.2; }
+  100% { opacity: 0.8; }
 }
 
+/* Header styling */
 .experience-header {
   text-align: center;
   margin-bottom: var(--space-xl);
 }
 
 .experience-header h1 {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   color: var(--color-secondary);
   margin-bottom: 0.5rem;
   text-shadow: 0 0 15px rgba(196, 180, 84, 0.5);
+  letter-spacing: 0.05em;
 }
 
 .experience-subtitle {
-  color: var(--color-text);
+  color: var(--color-secondary-light);
   font-size: 1.5rem;
   font-family: var(--font-family-quote);
   font-weight: 400;
+  font-style: italic;
 }
 
-.selector-label {
+/* Chapters container */
+.chapters-container {
+  width: 100%;
+}
+
+.chapters-title {
   text-align: center;
-  margin-bottom: var(--space-md);
-  font-size: 1.2rem;
-  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 1.6rem;
+  font-family: var(--font-family-quote);
 }
 
-.chapter-cards {
+.chapters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-lg);
-  margin-bottom: var(--space-xxl);
+  margin-bottom: var(--space-xl);
 }
 
 .chapter-card {
-  background-color: var(--color-surface);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
+  overflow: hidden;
   box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  position: relative;
+  background: linear-gradient(145deg, rgba(0, 0, 0, 0.7), rgba(20, 20, 20, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.6;
 }
 
-.chapter-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  background-color: rgba(75, 46, 131, 0.3);
+.chapter-card.available {
+  opacity: 1;
+  background: linear-gradient(145deg, rgba(75, 46, 131, 0.3), rgba(20, 20, 20, 0.9));
+  border: 1px solid var(--color-secondary);
+  box-shadow: 0 0 20px rgba(196, 180, 84, 0.2);
 }
 
-.chapter-card.active {
-  border-color: var(--color-secondary);
-  box-shadow: 0 0 15px rgba(196, 180, 84, 0.3);
-  background-color: rgba(75, 46, 131, 0.4);
+.chapter-card.available:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 0 30px rgba(196, 180, 84, 0.3);
+}
+
+.chapter-content {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 100%;
 }
 
 .chapter-number {
   font-size: 2.5rem;
   font-family: var(--font-family-heading);
-  color: var(--color-secondary);
-  margin-right: var(--space-lg);
+  font-weight: bold;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+  background-color: rgba(0, 0, 0, 0.3);
   width: 60px;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.3);
-  box-shadow: var(--shadow-sm);
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.chapter-info {
-  flex: 1;
+.chapter-card.available .chapter-number {
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  background-color: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(196, 180, 84, 0.3);
 }
 
 .chapter-title {
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-md);
+  font-size: 1.2rem;
+  color: var(--color-text);
+  height: 2.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chapter-card.available .chapter-title {
   color: var(--color-secondary-light);
+}
+
+.chapter-status {
+  margin-bottom: var(--space-lg);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.chapter-status.available {
+  color: var(--color-secondary);
+  font-weight: 500;
+}
+
+.chapter-status.locked {
+  color: var(--color-text-muted);
+}
+
+.lock-icon {
+  font-size: 1.1rem;
+  color: #FFC107;
+}
+
+.chapter-btn {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  font-family: var(--font-family-heading);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  width: 100%;
+}
+
+.chapter-btn:hover {
+  background-color: var(--color-secondary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(196, 180, 84, 0.3);
+}
+
+/* Current chapter view */
+.chapter-content-view {
+  width: 100%;
+  animation: fadeIn 0.5s ease;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.current-chapter-title {
+  font-size: 1.5rem;
+  color: var(--color-secondary);
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+}
+
+.back-btn {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  border: none;
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-normal);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.back-btn:hover {
+  background-color: var(--color-secondary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(196, 180, 84, 0.3);
+}
+
+.back-arrow {
   font-size: 1.2rem;
 }
 
-.chapter-desc {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.chapter-content {
-  margin-bottom: var(--space-xxl);
-}
-
-.chapter-placeholder {
+/* Chapter intro */
+.chapter-intro {
   text-align: center;
-  padding: var(--space-xxl) var(--space-xl);
+  margin-bottom: var(--space-xl);
+  padding: var(--space-xl);
+  background: linear-gradient(145deg, rgba(75, 46, 131, 0.2), rgba(0, 0, 0, 0.5));
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-secondary);
+  box-shadow: 0 0 20px rgba(196, 180, 84, 0.1);
+}
+
+.chapter-intro-title {
+  font-size: 2.2rem;
+  color: var(--color-secondary);
+  margin-bottom: var(--space-md);
+  text-shadow: 0 0 10px rgba(196, 180, 84, 0.3);
+}
+
+.chapter-intro-description {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+/* Placeholder for unavailable chapters */
+.chapter-placeholder {
+  padding: var(--space-xxl) var(--space-lg);
   background-color: var(--color-surface);
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-lg);
-  margin-bottom: var(--space-xxl);
+  text-align: center;
+  margin-bottom: var(--space-xl);
 }
 
-.chapter-placeholder h3 {
-  color: var(--color-secondary);
-  margin-bottom: var(--space-lg);
-  font-size: 1.8rem;
+.placeholder-content {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.chapter-placeholder p {
+.placeholder-icon {
+  font-size: 3rem;
+  color: #FFC107;
   margin-bottom: var(--space-lg);
+}
+
+.placeholder-message {
   color: var(--color-text-muted);
+  font-style: italic;
+  margin: var(--space-lg) 0;
 }
 
+/* Footer */
 .experience-footer {
+  margin-top: var(--space-xxl);
   text-align: center;
   padding: var(--space-lg);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.experience-footer p {
-  margin-bottom: var(--space-lg);
+  font-family: var(--font-family-quote);
+  font-style: italic;
+  color: var(--color-text-muted);
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.footer-actions {
-  display: flex;
-  justify-content: center;
+.verse-ref {
+  display: block;
+  margin-top: var(--space-xs);
+  color: var(--color-secondary);
+  font-weight: 500;
 }
 
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsiveness */
 @media (max-width: 768px) {
   .experience-header h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .experience-subtitle {
     font-size: 1.2rem;
   }
 
-  .chapter-cards {
+  .chapters-grid {
     grid-template-columns: 1fr;
   }
 
-  .chapter-card {
-    padding: var(--space-md);
+  .chapter-header {
+    flex-direction: column;
   }
 
-  .chapter-placeholder {
-    padding: var(--space-xl) var(--space-md);
+  .back-btn {
+    width: 100%;
+    justify-content: center;
   }
 
-  .chapter-placeholder h3 {
-    font-size: 1.5rem;
+  .current-chapter-title {
+    width: 100%;
+    order: -1;
+    font-size: 1.3rem;
+  }
+
+  .chapter-intro-title {
+    font-size: 1.8rem;
   }
 }
 </style>

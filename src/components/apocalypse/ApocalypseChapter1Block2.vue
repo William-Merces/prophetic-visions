@@ -1,6 +1,50 @@
 <template>
   <div class="apocalypse-vision">
     <!-- Bloco 2: A Experiência da Visão -->
+    <div class="block-header">
+      <h3 class="block-title">Através dos Olhos de João</h3>
+      <p class="block-subtitle">Experimente a visão do Filho do Homem como se você estivesse em Patmos</p>
+    </div>
+
+    <!-- Introdução da visão -->
+    <div v-if="currentStep === 'intro'" class="vision-intro">
+      <div class="intro-content">
+        <p>Prepare-se para experimentar a visão revelada a João em Patmos. Você verá o que ele viu, sentirá o que ele sentiu, quando o véu entre os mundos foi temporariamente levantado.</p>
+        <p>Esta experiência é dividida em três partes:</p>
+
+        <div class="intro-steps">
+          <div class="intro-step">
+            <div class="step-icon">👁️</div>
+            <div class="step-info">
+              <h4>A Narrativa da Visão</h4>
+              <p>Vivencie os momentos quando João foi arrebatado em espírito e viu o Cristo glorificado.</p>
+            </div>
+          </div>
+
+          <div class="intro-step">
+            <div class="step-icon">🔍</div>
+            <div class="step-info">
+              <h4>Explorando os Detalhes</h4>
+              <p>Examine os elementos da visão interativamente, descobrindo seu significado e importância.</p>
+            </div>
+          </div>
+
+          <div class="intro-step">
+            <div class="step-icon">🧠</div>
+            <div class="step-info">
+              <h4>Reflexão Pessoal</h4>
+              <p>Reflita sobre o significado desta visão para João e para você hoje.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary begin-btn" @click="startNarration">
+          Começar a Experiência <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Narração imersiva -->
     <ImersiveNarrative
       v-if="currentStep === 'narration'"
       :slides="visionSlides"
@@ -9,7 +53,7 @@
       @complete="completeNarration"
     />
 
-    <!-- Hotspots interativos após a narração -->
+    <!-- Interação com a visão -->
     <div v-if="currentStep === 'interaction'" class="vision-interaction">
       <div class="interactive-wrapper">
         <img
@@ -19,14 +63,14 @@
         >
 
         <!-- Overlay narrativo inicial -->
-        <div v-if="!hasInteracted" class="narrative-overlay" @click="hideNarrativeOverlay">
+        <div v-if="!hasInteracted && currentInteractionImage.narrative" class="narrative-overlay" @click="hideNarrativeOverlay">
           <div class="narrative-content">
             <p>{{ currentInteractionImage.narrative }}</p>
             <div class="narrative-hint">Toque nos pontos brilhantes para explorar detalhes da visão</div>
           </div>
         </div>
 
-        <!-- Hotspots -->
+        <!-- Hotspots interativos -->
         <div
           v-for="(hotspot, index) in currentInteractionImage.hotspots"
           :key="index"
@@ -50,17 +94,18 @@
             </div>
             <div class="details-content">
               <p>{{ currentHotspotData.description }}</p>
+
               <div v-if="currentHotspotData.scripture" class="scripture-reference">
                 <p class="scripture-text">"{{ currentHotspotData.scripture }}"</p>
                 <span class="scripture-verse">{{ currentHotspotData.reference }}</span>
               </div>
 
               <div v-if="currentHotspotData.reflection" class="reflection-section">
-                <h4>Reflexão Pessoal</h4>
+                <h4>Reflexão</h4>
                 <p>{{ currentHotspotData.reflection }}</p>
               </div>
 
-              <!-- Botões de navegação entre hotspots quando houver múltiplos -->
+              <!-- Botões de navegação entre hotspots -->
               <div v-if="currentInteractionImage.hotspots.length > 1" class="hotspot-navigation">
                 <button
                   class="nav-btn hotspot-prev"
@@ -109,32 +154,32 @@
           class="nav-btn complete-btn"
           @click="completeInteraction"
         >
-          Concluir <span class="nav-arrow">→</span>
+          Avançar para Reflexão <span class="nav-arrow">→</span>
         </button>
       </div>
     </div>
 
-    <!-- Reflexão final após a interação -->
+    <!-- Reflexão final -->
     <div v-if="currentStep === 'reflection'" class="vision-reflection">
       <div class="reflection-container">
-        <h2 class="reflection-title">Reflexão: O Encontro Divino</h2>
+        <h2 class="reflection-title">Refletindo sobre a Visão</h2>
 
         <div class="reflection-content">
-          <p>Você acaba de experimentar a visão de João do Filho do Homem em toda Sua glória. Agora, tome um momento para refletir sobre esta experiência:</p>
+          <p>Você acaba de experimentar a visão de João do Filho do Homem em toda Sua glória. Esta revelação não foi apenas para impressionar, mas para transmitir verdades profundas sobre Cristo e Sua relação com a igreja.</p>
 
           <div class="reflection-questions">
             <div class="question-item">
-              <h3>1. A Santidade Divina</h3>
+              <h3>A Divindade Revelada</h3>
               <p>Quando você contempla um Cristo tão poderoso e majestoso, como isso transforma sua compreensão de quem Ele é? Como o conhecimento de que Jesus não é apenas um humilde servo, mas o Senhor glorificado, afeta sua adoração?</p>
             </div>
 
             <div class="question-item">
-              <h3>2. A Identidade da Igreja</h3>
+              <h3>A Presença na Igreja</h3>
               <p>Cristo caminha entre os candeeiros de ouro - as igrejas. O que isso revela sobre o valor que Ele dá à Sua igreja e Sua presença contínua entre os crentes? Como isso desafia a maneira como vemos nossa comunidade de fé?</p>
             </div>
 
             <div class="question-item">
-              <h3>3. O Temor e o Conforto</h3>
+              <h3>O Temor e o Conforto</h3>
               <p>João cai como morto diante da visão, mas é confortado pelo toque de Cristo. Como você equilibra o temor reverente diante da santidade de Deus com a intimidade pessoal que Ele oferece? O que significa receber o "Não temas" divino?</p>
             </div>
           </div>
@@ -147,22 +192,10 @@
 
         <div class="reflection-actions">
           <button class="btn btn-secondary" @click="completeReflection">
-            Concluir Reflexão e Avançar
+            Concluir Bloco <span class="btn-icon">→</span>
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- Botão para concluir o bloco -->
-    <div v-if="currentStep === 'completed'" class="block-completed">
-      <h3>Experiência Concluída</h3>
-      <p>Você vivenciou a visão de João do Filho do Homem e refletiu sobre seu significado.</p>
-      <p class="completion-message">
-        "Quando o vi, caí a seus pés como morto. Então ele colocou sua mão direita sobre mim e disse: 'Não tenha medo. Eu sou o Primeiro e o Último. Sou o que vive. Estive morto, mas eis que estou vivo para todo o sempre!'" <span class="verse-ref">— Apocalipse 1:17-18</span>
-      </p>
-      <button class="btn btn-primary" @click="$emit('complete')">
-        Continuar para o próximo bloco
-      </button>
     </div>
   </div>
 </template>
@@ -177,15 +210,10 @@ export default {
   },
   data() {
     return {
-      currentStep: 'narration', // 'narration', 'interaction', 'reflection', 'completed'
+      currentStep: 'intro', // 'intro', 'narration', 'interaction', 'reflection'
       interactionIndex: 0,
       activeHotspot: null,
       hasInteracted: false,
-      completedSections: {
-        narration: false,
-        interaction: false,
-        reflection: false
-      },
 
       // Slides para a narrativa imersiva
       visionSlides: [
@@ -313,15 +341,6 @@ export default {
               scripture: "Vós sois a luz do mundo. Não se pode esconder uma cidade edificada sobre um monte.",
               reference: "Mateus 5:14",
               reflection: "Cada candeeiro representa uma comunidade de fé distinta, com seus próprios desafios e forças. Juntos, porém, eles formam uma luz mais poderosa, revelando o propósito divino para a igreja como um todo."
-            },
-            {
-              x: 50,
-              y: 20,
-              title: "Não Temas",
-              description: "Mesmo na majestade aterrorizante da visão, há uma aura de conforto que começa a envolver você. As primeiras palavras de Cristo - 'Não temas' - começam a acalmar seu coração enquanto Ele se aproxima. Existe uma intimidade e um amor por trás da glória terrível, um desejo de comunicar e não apenas assustar.",
-              scripture: "Não temas; Eu sou o primeiro e o último; E o que vive; fui morto, mas eis aqui estou vivo para todo o sempre.",
-              reference: "Apocalipse 1:17-18",
-              reflection: "O temor é a resposta natural à santidade divina, mas não é o estado final desejado. Cristo não revela Sua glória para nos paralisar de medo, mas para transformar nosso temor em adoração e confiança renovada."
             }
           ]
         },
@@ -357,15 +376,6 @@ export default {
               scripture: "E os seus olhos eram como chama de fogo.",
               reference: "Apocalipse 1:14",
               reflection: "Os olhos que choram por Lázaro também flamejam com discernimento perfeito. O mesmo Jesus que vê nossas lágrimas também conhece nossos corações. Não podemos esconder nada dEle, mas também não precisamos - Ele já conhece e ainda ama."
-            },
-            {
-              x: 50,
-              y: 85,
-              title: "Pés de Bronze",
-              description: "Seus pés brilham como bronze refinado em uma fornalha, reluzentes e indestrutivelmente fortes. Onde Ele pisa, o chão parece vibrar com poder e autoridade. Estes não são pés que vacilam ou tropeçam, mas que permanecem firmes em Seu propósito eterno, capazes de esmagar toda oposição.",
-              scripture: "E os seus pés, semelhantes a latão reluzente, como se tivessem sido refinados numa fornalha...",
-              reference: "Apocalipse 1:15",
-              reflection: "Os pés que foram perfurados na cruz agora resplandecem como metal purificado. O sofrimento deu lugar à força inabalável. A cruz, que parecia derrota, revela-se como o caminho para a glória eterna."
             }
           ]
         },
@@ -401,41 +411,6 @@ export default {
               scripture: "E o seu rosto era como o sol, quando resplandece na sua força.",
               reference: "Apocalipse 1:16",
               reflection: "O rosto que foi cuspido e golpeado agora brilha como o sol em sua força. A humilhação deu lugar à exaltação suprema. O mesmo Jesus que foi desprezado agora é a fonte de toda luz e glória."
-            },
-            {
-              x: 50,
-              y: 70,
-              title: "Voz como Muitas Águas",
-              description: "Quando Cristo fala, sua voz ressoa não como uma voz humana, mas como o som de cachoeiras, oceanos e rios poderosos combinados. É um som majestoso, irresistível e esmagador que vibra em seu peito e enche todo o ambiente. É a voz do Criador, a mesma que pronunciou 'haja luz' e trouxe o universo à existência.",
-              scripture: "E a sua voz era como a voz de muitas águas.",
-              reference: "Apocalipse 1:15",
-              reflection: "A voz que sussurrou parábolas à multidão agora ressoa como o rugido de muitas águas. O mesmo Deus que fala em 'silêncio suave' também proclama Sua verdade com autoridade cósmica que nenhum poder pode silenciar."
-            }
-          ]
-        },
-        {
-          src: "/images/apocalypse/interactive-falling-rising.jpg",
-          alt: "Caindo e Sendo Erguido",
-          title: "Caindo e Sendo Erguido",
-          narrative: "A visão é simplesmente esmagadora para sua capacidade humana. Como Isaías, Ezequiel e Daniel antes de você, a revelação da glória divina é mais do que um mortal pode suportar. Você cai como morto, completamente sobrecarregado pela santidade divina, mas o que vem a seguir é tão surpreendente quanto a própria visão.",
-          hotspots: [
-            {
-              x: 35,
-              y: 60,
-              title: "Caindo como Morto",
-              description: "Você experimenta o colapso total da força humana diante da santidade divina. Seu corpo simplesmente não consegue permanecer de pé. É como se toda energia vital o abandonasse, deixando-o prostrado e indefeso. Não é um desmaio comum, mas o impacto da presença não mediada de Deus sobre um ser mortal e finito.",
-              scripture: "E eu, quando o vi, caí a seus pés como morto...",
-              reference: "Apocalipse 1:17",
-              reflection: "Há uma diferença entre adoração casual e encontro genuíno com o Deus vivo. A queda de João representa a resposta apropriada à verdadeira santidade - não familiaridade casual, mas prostração reverente diante dAquele que transcende nossa compreensão."
-            },
-            {
-              x: 65,
-              y: 40,
-              title: "O Toque Confortador",
-              description: "Quando pensa que vai morrer, você sente o toque da mão direita de Cristo - a mesma mão que segura as sete estrelas. Não é um toque que queima ou destroi, mas que restaura. É gentil, mas poderoso, transmitindo vida e força para seu corpo debilitado. Com esse toque, começa a retornar à consciência e ouvir Suas palavras de conforto.",
-              scripture: "E ele pôs sobre mim a sua destra, dizendo-me: Não temas; Eu sou o primeiro e o último...",
-              reference: "Apocalipse 1:17",
-              reflection: "O mesmo Cristo que tem poder para nos deixar prostrados também nos levanta com Sua mão direita. Sua santidade nos derruba, mas Seu amor nos ergue. Este é o padrão do encontro divino: somos quebrantados para sermos restaurados."
             }
           ]
         },
@@ -462,15 +437,6 @@ export default {
               scripture: "Não temas... fui morto, mas eis aqui estou vivo para todo o sempre, Amém.",
               reference: "Apocalipse 1:17-18",
               reflection: "A ressurreição não é apenas um evento histórico, mas uma realidade presente e eterna. Cristo não apenas ressuscitou, mas 'está vivo para todo o sempre'. Sua vitória não é temporária, mas permanente; não é parcial, mas completa e irreversível."
-            },
-            {
-              x: 50,
-              y: 30,
-              title: "O Primeiro e o Último",
-              description: "A voz de Cristo declara: 'Eu sou o Primeiro e o Último'. Estas palavras fazem o tempo e o espaço ao seu redor parecerem dobrar-se. Você vislumbra, por um momento, a eternidade que se estende antes da criação e além do fim dos tempos. Cristo existe antes do início e permanecerá após o fim - toda a história está contida em Seu ser.",
-              scripture: "Eu sou o Alfa e o Ômega, o princípio e o fim, diz o Senhor, que é, e que era, e que há de vir, o Todo-Poderoso.",
-              reference: "Apocalipse 1:8",
-              reflection: "Num mundo de constante mudança, Cristo permanece o ponto fixo - o Primeiro e o Último. Nossa história pessoal, com todos seus altos e baixos, está contida dentro da história maior que Ele sustenta do início ao fim. Nada em nossas vidas está fora de Seu conhecimento ou controle."
             }
           ]
         }
@@ -486,51 +452,26 @@ export default {
       return this.currentInteractionImage.hotspots[this.activeHotspot] || {}
     }
   },
-  mounted() {
-    // Adicionar manipuladores de teclas para navegação
-    window.addEventListener('keydown', this.handleKeyDown)
-  },
-  beforeUnmount() {
-    // Remover manipuladores de teclas
-    window.removeEventListener('keydown', this.handleKeyDown)
-  },
   methods: {
-    handleKeyDown(event) {
-      // Navegação com teclas de seta
-      if (this.currentStep === 'interaction') {
-        if (event.key === 'ArrowLeft') {
-          this.previousImage()
-        } else if (event.key === 'ArrowRight') {
-          this.nextImage()
-        } else if (event.key === 'Escape') {
-          this.closeHotspot()
-        }
-      }
+    startNarration() {
+      this.currentStep = 'narration'
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     },
 
-    // Navegação entre etapas
     completeNarration() {
       this.currentStep = 'interaction'
-      this.completedSections.narration = true
-      // Rolar para o topo quando mudar para a interação
-      window.scrollTo(0, 0)
+      this.interactionIndex = 0
+      this.activeHotspot = null
+      this.hasInteracted = false
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     },
 
-    completeInteraction() {
-      this.currentStep = 'reflection'
-      this.completedSections.interaction = true
-      // Rolar para o topo quando mudar para a reflexão
-      window.scrollTo(0, 0)
-    },
-
-    completeReflection() {
-      this.currentStep = 'completed'
-      this.completedSections.reflection = true
-      // Rolar para o topo quando concluir
-      window.scrollTo(0, 0)
-    },
-
-    // Métodos para a interação com hotspots
     hideNarrativeOverlay() {
       this.hasInteracted = true
     },
@@ -554,7 +495,6 @@ export default {
       }
     },
 
-    // Navegação entre imagens
     previousImage() {
       if (this.interactionIndex > 0) {
         this.interactionIndex--
@@ -569,6 +509,19 @@ export default {
         this.activeHotspot = null
         this.hasInteracted = false
       }
+    },
+
+    completeInteraction() {
+      this.currentStep = 'reflection'
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    },
+
+    completeReflection() {
+      // Emitir evento para o componente pai saber que o bloco foi concluído
+      this.$emit('complete', 2)
     }
   }
 }
@@ -578,7 +531,96 @@ export default {
 .apocalypse-vision {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1rem;
+  animation: fadeIn 1s ease;
+}
+
+.block-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.block-title {
+  font-size: 2rem;
+  color: var(--color-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.block-subtitle {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  font-style: italic;
+  font-family: var(--font-family-quote);
+}
+
+/* Introdução */
+.vision-intro {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.intro-content p {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  line-height: 1.7;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.intro-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xl);
+  margin: var(--space-xl) 0;
+}
+.intro-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  max-width: 300px;
+}
+
+.step-icon {
+  font-size: 2rem;
+  color: var(--color-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.step-info h4 {
+  margin-bottom: var(--space-xs);
+  color: var(--color-secondary-light);
+  font-size: 1.1rem;
+}
+
+.step-info p {
+  font-size: 0.95rem;
+  text-align: left;
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+.begin-btn {
+  margin-top: var(--space-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 1.1rem;
+}
+
+.btn-icon {
+  transition: transform var(--transition-fast);
+}
+
+.begin-btn:hover .btn-icon {
+  transform: translateX(5px);
 }
 
 /* Estilização para a seção de interação */
@@ -590,6 +632,7 @@ export default {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   margin-bottom: var(--space-xl);
+  animation: fadeIn 0.8s ease;
 }
 
 .interactive-wrapper {
@@ -600,6 +643,8 @@ export default {
   width: 100%;
   height: auto;
   display: block;
+  max-height: 70vh;
+  object-fit: contain;
 }
 
 /* Estilização do overlay narrativo */
@@ -635,6 +680,12 @@ export default {
   animation: pulse 2s infinite ease-in-out;
 }
 
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
 /* Estilização dos hotspots */
 .hotspot {
   position: absolute;
@@ -661,7 +712,13 @@ export default {
 }
 
 .hotspot.pulsating .hotspot-indicator {
-  animation: pulse 2s infinite;
+  animation: hotspotPulse 2s infinite;
+}
+
+@keyframes hotspotPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
 }
 
 .hotspot.active .hotspot-indicator {
@@ -672,12 +729,6 @@ export default {
 
 .hotspot:hover .hotspot-indicator {
   transform: translate(-50%, -50%) scale(1.3);
-}
-
-@keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
 }
 
 /* Estilização do painel de detalhes */
@@ -903,52 +954,7 @@ export default {
   margin-top: var(--space-xl);
 }
 
-/* Etapa final: bloco completado */
-.block-completed {
-  text-align: center;
-  padding: var(--space-xxl) var(--space-xl);
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-lg);
-  animation: fadeIn 1s ease;
-}
-
-.block-completed h3 {
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-  font-size: 1.5rem;
-}
-
-.block-completed p {
-  margin-bottom: var(--space-lg);
-  line-height: 1.7;
-}
-
-.completion-message {
-  font-family: var(--font-family-quote);
-  font-style: italic;
-  max-width: 800px;
-  margin: 0 auto var(--space-xl);
-  padding: var(--space-md);
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-secondary);
-}
-
-.verse-ref {
-  display: block;
-  text-align: right;
-  color: var(--color-secondary);
-  margin-top: var(--space-xs);
-}
-
-/* Animações */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+/* Transições */
 .detail-fade-enter-active, .detail-fade-leave-active {
   transition: all 0.3s ease;
 }
@@ -957,10 +963,19 @@ export default {
   transform: translateY(20px);
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .apocalypse-vision {
     padding: 1rem 0.5rem;
+  }
+
+  .block-title {
+    font-size: 1.5rem;
   }
 
   .narrative-content p {
@@ -976,6 +991,7 @@ export default {
     max-height: 60vh;
     overflow-y: auto;
     border-radius: var(--radius-md) var(--radius-md) 0 0;
+    z-index: 100;
   }
 
   .interaction-navigation {
@@ -991,6 +1007,7 @@ export default {
 
   .nav-btn {
     flex: 1;
+    justify-content: center;
   }
 
   .vision-reflection {
@@ -999,6 +1016,22 @@ export default {
 
   .reflection-title {
     font-size: 1.5rem;
+  }
+
+  .intro-steps {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .intro-step {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .begin-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
