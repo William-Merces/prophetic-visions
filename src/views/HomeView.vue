@@ -7,7 +7,13 @@
     <div class="hero-section">
       <h1 class="hero-title">Prophetic Visions</h1>
       <p class="hero-subtitle">Explore as visões proféticas das escrituras através de imagens interativas</p>
-      <router-link to="/revelation" class="btn btn-hero">Começar a Jornada</router-link>
+
+      <div class="hero-actions">
+        <router-link to="/revelation" class="btn btn-hero">Começar a Jornada</router-link>
+        <router-link to="/experience" class="btn btn-hero-secondary">
+          Experiência Imersiva <span class="new-badge">Novo!</span>
+        </router-link>
+      </div>
     </div>
 
     <div class="vision-books">
@@ -141,9 +147,45 @@ export default {
   color: var(--color-text-muted);
 }
 
+.hero-actions {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .btn-hero {
   font-size: 1.1rem;
   padding: var(--space-md) var(--space-xl);
+}
+
+.btn-hero-secondary {
+  font-size: 1.1rem;
+  padding: var(--space-md) var(--space-xl);
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--color-secondary);
+  color: var(--color-secondary);
+  position: relative;
+}
+
+.btn-hero-secondary:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  transform: translateY(-3px);
+}
+
+.new-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
 }
 
 .vision-books,
@@ -230,6 +272,14 @@ export default {
 
   .hero-subtitle {
     font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
   }
 
   .vision-books,
