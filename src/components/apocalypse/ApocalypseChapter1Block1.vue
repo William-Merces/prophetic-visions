@@ -11,28 +11,51 @@
       :slides="contextSlides"
       :typing-speed="40"
       :auto-start-typing="true"
+      :auto-fullscreen="true"
       @complete="narrativeCompleted = true"
+      @exit-fullscreen="$emit('exit-fullscreen')"
     />
 
     <!-- Seção de reflexão após completar a narrativa -->
     <div v-if="narrativeCompleted" class="reflection-section">
       <h4 class="reflection-title">Reflexão Histórica</h4>
 
-      <div class="reflection-questions">
-        <div class="question-card">
-          <h5>O Império e a Igreja</h5>
-          <p>A igreja primitiva enfrentou severa perseguição sob o Império Romano. Como o contexto político do primeiro século moldou a forma e o conteúdo da revelação dada a João?</p>
-        </div>
+      <div
+        class="reflection-questions"
+        v-touch:swipe.left="nextReflectionQuestion"
+        v-touch:swipe.right="prevReflectionQuestion"
+      >
+        <transition-group name="slide-fade" tag="div" class="questions-carousel">
+          <div
+            v-for="(question, index) in reflectionQuestions"
+            :key="question.id"
+            v-show="currentQuestion === index"
+            class="question-card"
+          >
+            <h5>{{ question.title }}</h5>
+            <p>{{ question.text }}</p>
 
-        <div class="question-card">
-          <h5>Exílio e Revelação</h5>
-          <p>João estava exilado em Patmos quando recebeu esta visão. De que maneira o isolamento pode ter preparado João para receber uma revelação tão profunda? O que isso nos ensina sobre momentos de isolamento em nossa própria vida espiritual?</p>
-        </div>
-
-        <div class="question-card">
-          <h5>O Dia do Senhor</h5>
-          <p>João especifica que estava "em espírito, no dia do Senhor" quando teve esta visão. Qual é o significado do "dia do Senhor" para a igreja primitiva e como isso contextualizaria esta experiência para os primeiros leitores?</p>
-        </div>
+            <div class="question-navigation">
+              <button
+                v-if="index > 0"
+                class="nav-btn"
+                @click="prevReflectionQuestion"
+              >
+                <span class="nav-arrow">←</span> Anterior
+              </button>
+              <div class="question-indicator">
+                {{ index + 1 }} / {{ reflectionQuestions.length }}
+              </div>
+              <button
+                v-if="index < reflectionQuestions.length - 1"
+                class="nav-btn"
+                @click="nextReflectionQuestion"
+              >
+                Próxima <span class="nav-arrow">→</span>
+              </button>
+            </div>
+          </div>
+        </transition-group>
       </div>
 
       <div class="historical-insights">
@@ -44,14 +67,13 @@
 
       <!-- Botão para completar o bloco -->
       <div class="completion-actions">
-        <button class="btn btn-secondary" @click="completeBlock">
+        <button class="btn btn-secondary" @click="completeBlock('next')">
           Concluir e Continuar <span class="btn-icon">→</span>
         </button>
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import ImersiveNarrative from './ImersiveNarrative.vue'
 
@@ -63,6 +85,27 @@ export default {
   data() {
     return {
       narrativeCompleted: false,
+      currentQuestion: 0,
+
+      // Questões de reflexão separadas
+      reflectionQuestions: [
+        {
+          id: 1,
+          title: "O Império e a Igreja",
+          text: "A igreja primitiva enfrentou severa perseguição sob o Império Romano. Como o contexto político do primeiro século moldou a forma e o conteúdo da revelação dada a João?"
+        },
+        {
+          id: 2,
+          title: "Exílio e Revelação",
+          text: "João estava exilado em Patmos quando recebeu esta visão. De que maneira o isolamento pode ter preparado João para receber uma revelação tão profunda? O que isso nos ensina sobre momentos de isolamento em nossa própria vida espiritual?"
+        },
+        {
+          id: 3,
+          title: "O Dia do Senhor",
+          text: "João especifica que estava \"em espírito, no dia do Senhor\" quando teve esta visão. Qual é o significado do \"dia do Senhor\" para a igreja primitiva e como isso contextualizaria esta experiência para os primeiros leitores?"
+        }
+      ],
+
       // Dados para a narrativa imersiva
       contextSlides: [
         {
@@ -127,14 +170,60 @@ export default {
     }
   },
   methods: {
-    completeBlock() {
+    completeBlock(action = null) {
       // Emitir evento para indicar que o bloco foi concluído
-      this.$emit('complete', 1);
+      this.$emit('complete', 1, action);
+    },
+
+    nextReflectionQuestion() {
+      if (this.currentQuestion < this.reflectionQuestions.length - 1) {
+        this.currentQuestion++;
+      }
+    },
+
+    prevReflectionQuestion() {
+      if (this.currentQuestion > 0) {
+        this.currentQuestion--;
+      }
+    },
+
+    // Inicializar observadores de toque para reflexão
+    setupTouchEvents() {
+      const questionsElement = this.$el.querySelector('.reflection-questions');
+      if (questionsElement) {
+        let startX = 0;
+        let endX = 0;
+
+        questionsElement.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+        }, { passive: true });
+
+        questionsElement.addEventListener('touchend', (e) => {
+          endX = e.changedTouches[0].clientX;
+
+          // Detectar direção do deslize
+          const diffX = endX - startX;
+          const threshold = 50; // Distância mínima para considerar como deslize
+
+          if (diffX > threshold) {
+            // Deslize para a direita
+            this.prevReflectionQuestion();
+          } else if (diffX < -threshold) {
+            // Deslize para a esquerda
+            this.nextReflectionQuestion();
+          }
+        }, { passive: true });
+      }
     }
+  },
+  mounted() {
+    this.setupTouchEvents();
+
+    // Garantir que o scroll esteja no topo
+    window.scrollTo(0, 0);
   }
 }
 </script>
-
 <style scoped>
 .history-context-block {
   max-width: 1200px;
@@ -191,10 +280,16 @@ export default {
 }
 
 .reflection-questions {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-lg);
   margin-bottom: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y; /* Permitir scroll vertical mas gerenciar swipe horizontal */
+  min-height: 200px; /* Altura mínima para evitar saltos de layout */
+}
+
+.questions-carousel {
+  position: relative;
+  width: 100%;
 }
 
 .question-card {
@@ -202,6 +297,9 @@ export default {
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   border-left: 3px solid var(--color-primary);
+  margin-bottom: var(--space-md);
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .question-card h5 {
@@ -213,6 +311,20 @@ export default {
 .question-card p {
   line-height: 1.7;
   color: var(--color-text);
+}
+
+.question-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.question-indicator {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 
 .historical-insights {
@@ -257,6 +369,43 @@ export default {
   transform: translateX(5px);
 }
 
+.nav-btn {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.nav-btn:hover, .nav-btn:active {
+  background-color: rgba(75, 46, 131, 0.4);
+  transform: translateY(-2px);
+}
+
+.nav-arrow {
+  font-size: 1.1rem;
+}
+
+/* Transições para carrossel de questões */
+.slide-fade-enter-active, .slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-enter-from, .slide-leave-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.slide-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Animações */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -277,9 +426,8 @@ export default {
     padding: var(--space-md);
   }
 
-  .reflection-questions {
-    grid-template-columns: 1fr;
-    gap: var(--space-md);
+  .question-card {
+    padding: var(--space-md);
   }
 
   .historical-insights {
@@ -289,6 +437,45 @@ export default {
   .btn-secondary {
     width: 100%;
     justify-content: center;
+  }
+
+  .question-navigation {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .question-indicator {
+    order: -1;
+    width: 100%;
+    text-align: center;
+    margin-bottom: var(--space-xs);
+  }
+}
+
+/* Dica visual de swipe */
+.reflection-questions::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  opacity: 0.7;
+  animation: swipeHint 2s infinite;
+}
+
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(-50%); }
+  50% { transform: translateX(calc(-50% + 15px)); }
+}
+
+/* Feedback de toque */
+@media (hover: none) {
+  .question-card:active {
+    background-color: rgba(75, 46, 131, 0.3);
   }
 }
 </style>

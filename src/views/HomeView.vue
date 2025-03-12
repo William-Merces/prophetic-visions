@@ -6,7 +6,10 @@
 
     <!-- Hero Section com visão imersiva -->
     <div class="hero-section">
-      <h1 class="hero-title">Prophetic Visions</h1>
+      <h1 class="hero-title">
+        <span class="hero-title-line">Prophetic</span>
+        <span class="hero-title-line">Visions</span>
+      </h1>
       <h2 class="hero-subtitle">Veja com os olhos dos profetas</h2>
 
       <div class="hero-description">
@@ -65,20 +68,30 @@
           class="book-card"
           :class="{ 'unlocked': book.unlocked }"
         >
-          <div class="book-icon">{{ book.icon }}</div>
-          <div class="book-content">
-            <h3>{{ book.name }}</h3>
-            <p class="book-author">{{ book.author }}</p>
-            <p class="book-description">{{ book.description }}</p>
+          <div class="book-cover">
+            <div class="book-spine"></div>
+            <div class="book-front">
+              <div class="book-icon">{{ book.icon }}</div>
+              <h3 class="book-title">{{ book.name }}</h3>
+              <div class="book-author">{{ book.author }}</div>
 
-            <div class="book-status">
-              <span v-if="book.unlocked" class="status-available">
-                <span class="check-icon">✓</span> Disponível
-              </span>
-              <span v-else class="status-locked">
-                <span class="lock-icon">🔒</span> Em breve
-              </span>
+              <div class="book-status">
+                <template v-if="book.unlocked">
+                  <span class="status-available">
+                    <span class="check-icon">✓</span> Disponível
+                  </span>
+                </template>
+                <template v-else>
+                  <span class="status-locked">
+                    <span class="lock-icon">🔒</span> Em breve
+                  </span>
+                </template>
+              </div>
             </div>
+          </div>
+
+          <div class="book-content">
+            <p class="book-description">{{ book.description }}</p>
 
             <div class="book-action">
               <router-link
@@ -88,6 +101,13 @@
               >
                 Explorar Visões
               </router-link>
+              <button
+                v-else
+                class="btn btn-book disabled"
+                disabled
+              >
+                Em desenvolvimento
+              </button>
             </div>
           </div>
         </div>
@@ -181,7 +201,7 @@ export default {
       const starsContainer = document.querySelector('.stars-container');
       if (!starsContainer) return;
 
-      const starCount = 100;
+      const starCount = 150;
 
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
@@ -256,10 +276,21 @@ export default {
   margin-bottom: var(--space-md);
   text-shadow: 0 0 20px rgba(196, 180, 84, 0.7);
   letter-spacing: 0.1em;
-  background: linear-gradient(to right, var(--color-secondary) 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-title-line {
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(to right, var(--color-secondary) 0%, #ffffff 50%, var(--color-secondary) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: block;
+  text-shadow: 0 0 20px rgba(196, 180, 84, 0.7);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
@@ -403,47 +434,101 @@ export default {
 }
 
 .book-card {
-  background-color: var(--color-surface);
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.7), rgba(20, 20, 20, 0.9));
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all var(--transition-normal);
-  text-align: left;
-  display: flex;
-  padding: var(--space-lg);
+  height: 100%;
+  box-shadow: var(--shadow-md);
+  position: relative;
   opacity: 0.7;
+  display: flex;
+  flex-direction: column;
 }
 
 .book-card.unlocked {
   opacity: 1;
-  border-color: rgba(196, 180, 84, 0.3);
-  box-shadow: 0 0 20px rgba(196, 180, 84, 0.1);
+  background: linear-gradient(145deg, rgba(75, 46, 131, 0.3), rgba(20, 20, 20, 0.9));
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.book-card:hover {
+  transform: translateY(-10px) rotate(1deg);
 }
 
 .book-card.unlocked:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 30px rgba(196, 180, 84, 0.2);
-  background-color: rgba(75, 46, 131, 0.2);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(196, 180, 84, 0.3);
+}
+
+.book-cover {
+  position: relative;
+  display: flex;
+  height: 200px;
+  perspective: 1000px;
+  margin-bottom: var(--space-md);
+}
+
+.book-spine {
+  width: 40px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
+  transform-origin: left;
+  transform: rotateY(25deg);
+  border-radius: 2px 0 0 2px;
+}
+
+.book-card.unlocked .book-spine {
+  background: linear-gradient(to right, var(--color-secondary-dark), var(--color-primary-dark));
+  box-shadow: 0 0 10px rgba(196, 180, 84, 0.2);
+}
+
+.book-front {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  width: calc(100% - 40px);
+  height: 100%;
+  background: linear-gradient(45deg, rgba(40, 40, 40, 0.9), rgba(60, 60, 60, 0.9));
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 0 5px 5px 0;
+  transform-origin: left;
+  transform: rotateY(15deg);
+  transition: all var(--transition-normal);
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.book-card.unlocked .book-front {
+  background: linear-gradient(45deg, rgba(75, 46, 131, 0.7), rgba(40, 40, 40, 0.9));
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(196, 180, 84, 0.2);
+}
+
+.book-card:hover .book-front {
+  transform: rotateY(0);
 }
 
 .book-icon {
   font-size: 2.5rem;
-  margin-right: var(--space-lg);
-  display: flex;
-  align-items: center;
+  margin-bottom: var(--space-sm);
+  animation: float 3s ease-in-out infinite;
 }
 
-.book-content {
-  flex: 1;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-.book-card h3 {
-  font-size: 1.4rem;
-  color: var(--color-text);
+.book-title {
+  font-size: 1.3rem;
   margin-bottom: var(--space-xs);
+  color: var(--color-text);
 }
 
-.book-card.unlocked h3 {
+.book-card.unlocked .book-title {
   color: var(--color-secondary);
 }
 
@@ -454,16 +539,11 @@ export default {
   margin-bottom: var(--space-sm);
 }
 
-.book-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: var(--space-md);
-  color: var(--color-text-muted);
-}
-
 .book-status {
-  font-size: 0.9rem;
-  margin-bottom: var(--space-md);
+  margin-top: auto;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
 }
@@ -472,35 +552,78 @@ export default {
   color: var(--color-secondary);
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 5px;
 }
 
 .check-icon {
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  border-radius: 50%;
+  font-size: 0.7rem;
 }
 
 .status-locked {
   color: var(--color-text-muted);
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 5px;
 }
 
 .lock-icon {
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.book-content {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.book-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+  flex: 1;
+}
+
+.book-card.unlocked .book-description {
+  color: var(--color-text);
+}
+
+.book-action {
+  margin-top: auto;
 }
 
 .btn-book {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
   padding: var(--space-xs) var(--space-md);
   font-size: 0.9rem;
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  transition: all var(--transition-normal);
+}
+
+.btn-book:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(196, 180, 84, 0.3);
+}
+
+.btn-book.disabled {
+  background-color: rgba(100, 100, 100, 0.3);
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Testimonials Section */
@@ -532,6 +655,14 @@ export default {
   padding: var(--space-xl);
   border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
+  transition: all var(--transition-normal);
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  background-color: rgba(75, 46, 131, 0.2);
+  border-color: rgba(196, 180, 84, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .testimonial-card::before {
@@ -557,6 +688,21 @@ export default {
 .testimonial-author {
   font-weight: 600;
   color: var(--color-secondary);
+  position: relative;
+  display: inline-block;
+  padding-top: var(--space-xs);
+}
+
+.testimonial-author::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background-color: var(--color-secondary);
+  opacity: 0.5;
 }
 
 /* Final CTA Section */
@@ -581,8 +727,8 @@ export default {
 
 /* Responsiveness */
 @media (max-width: 1024px) {
-  .hero-title {
-    font-size: 3rem;
+  .hero-title-line {
+    font-size: 5rem;
   }
 
   .hero-subtitle {
@@ -604,8 +750,8 @@ export default {
     padding: var(--space-xl) var(--space-md);
   }
 
-  .hero-title {
-    font-size: 2.5rem;
+  .hero-title-line {
+    font-size: 3.5rem;
   }
 
   .hero-subtitle {
@@ -630,21 +776,26 @@ export default {
   }
 
   .book-card {
-    flex-direction: column;
+    max-width: 350px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title-line {
+    font-size: 2.8rem;
   }
 
-  .book-icon {
-    margin-right: 0;
-    margin-bottom: var(--space-md);
-    justify-content: center;
+  .hero-subtitle {
+    font-size: 1rem;
   }
 
-  .book-content {
-    text-align: center;
+  .features-grid {
+    grid-template-columns: 1fr;
   }
 
-  .book-status {
-    justify-content: center;
+  .testimonial-quote {
+    font-size: 1rem;
   }
 }
 </style>

@@ -1,205 +1,3 @@
-<template>
-  <div class="apocalypse-vision">
-    <!-- Bloco 2: A Experiência da Visão -->
-    <div class="block-header">
-      <h3 class="block-title">Através dos Olhos de João</h3>
-      <p class="block-subtitle">Experimente a visão do Filho do Homem como se você estivesse em Patmos</p>
-    </div>
-
-    <!-- Introdução da visão -->
-    <div v-if="currentStep === 'intro'" class="vision-intro">
-      <div class="intro-content">
-        <p>Prepare-se para experimentar a visão revelada a João em Patmos. Você verá o que ele viu, sentirá o que ele sentiu, quando o véu entre os mundos foi temporariamente levantado.</p>
-        <p>Esta experiência é dividida em três partes:</p>
-
-        <div class="intro-steps">
-          <div class="intro-step">
-            <div class="step-icon">👁️</div>
-            <div class="step-info">
-              <h4>A Narrativa da Visão</h4>
-              <p>Vivencie os momentos quando João foi arrebatado em espírito e viu o Cristo glorificado.</p>
-            </div>
-          </div>
-
-          <div class="intro-step">
-            <div class="step-icon">🔍</div>
-            <div class="step-info">
-              <h4>Explorando os Detalhes</h4>
-              <p>Examine os elementos da visão interativamente, descobrindo seu significado e importância.</p>
-            </div>
-          </div>
-
-          <div class="intro-step">
-            <div class="step-icon">🧠</div>
-            <div class="step-info">
-              <h4>Reflexão Pessoal</h4>
-              <p>Reflita sobre o significado desta visão para João e para você hoje.</p>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-secondary begin-btn" @click="startNarration">
-          Começar a Experiência <span class="btn-icon">→</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Narração imersiva -->
-    <ImersiveNarrative
-      v-if="currentStep === 'narration'"
-      :slides="visionSlides"
-      blockTitle="Através dos Olhos de João"
-      :typingSpeed="50"
-      @complete="completeNarration"
-    />
-
-    <!-- Interação com a visão -->
-    <div v-if="currentStep === 'interaction'" class="vision-interaction">
-      <div class="interactive-wrapper">
-        <img
-          :src="currentInteractionImage.src"
-          :alt="currentInteractionImage.alt"
-          class="vision-image"
-        >
-
-        <!-- Overlay narrativo inicial -->
-        <div v-if="!hasInteracted && currentInteractionImage.narrative" class="narrative-overlay" @click="hideNarrativeOverlay">
-          <div class="narrative-content">
-            <p>{{ currentInteractionImage.narrative }}</p>
-            <div class="narrative-hint">Toque nos pontos brilhantes para explorar detalhes da visão</div>
-          </div>
-        </div>
-
-        <!-- Hotspots interativos -->
-        <div
-          v-for="(hotspot, index) in currentInteractionImage.hotspots"
-          :key="index"
-          class="hotspot"
-          :class="{ 'active': activeHotspot === index, 'pulsating': !activeHotspot }"
-          :style="{
-            left: `${hotspot.x}%`,
-            top: `${hotspot.y}%`
-          }"
-          @click="selectHotspot(index)"
-        >
-          <div class="hotspot-indicator"></div>
-        </div>
-
-        <!-- Painel de detalhes do hotspot -->
-        <transition name="detail-fade">
-          <div v-if="activeHotspot !== null" class="hotspot-details">
-            <div class="details-header">
-              <h3>{{ currentHotspotData.title }}</h3>
-              <button class="close-btn" @click="closeHotspot">&times;</button>
-            </div>
-            <div class="details-content">
-              <p>{{ currentHotspotData.description }}</p>
-
-              <div v-if="currentHotspotData.scripture" class="scripture-reference">
-                <p class="scripture-text">"{{ currentHotspotData.scripture }}"</p>
-                <span class="scripture-verse">{{ currentHotspotData.reference }}</span>
-              </div>
-
-              <div v-if="currentHotspotData.reflection" class="reflection-section">
-                <h4>Reflexão</h4>
-                <p>{{ currentHotspotData.reflection }}</p>
-              </div>
-
-              <!-- Botões de navegação entre hotspots -->
-              <div v-if="currentInteractionImage.hotspots.length > 1" class="hotspot-navigation">
-                <button
-                  class="nav-btn hotspot-prev"
-                  @click.stop="navigateHotspot('prev')"
-                  :disabled="activeHotspot === 0"
-                >
-                  <span class="nav-icon">←</span> Anterior
-                </button>
-                <button
-                  class="nav-btn hotspot-next"
-                  @click.stop="navigateHotspot('next')"
-                  :disabled="activeHotspot === currentInteractionImage.hotspots.length - 1"
-                >
-                  Próximo <span class="nav-icon">→</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </transition>
-      </div>
-
-      <!-- Navegação entre as imagens interativas -->
-      <div class="interaction-navigation">
-        <button
-          v-if="interactionIndex > 0"
-          class="nav-btn"
-          @click="previousImage"
-        >
-          <span class="nav-arrow">←</span> Imagem anterior
-        </button>
-
-        <div class="image-info">
-          <span class="current-image">{{ interactionIndex + 1 }}</span> / {{ interactiveImages.length }}
-        </div>
-
-        <button
-          v-if="interactionIndex < interactiveImages.length - 1"
-          class="nav-btn"
-          @click="nextImage"
-        >
-          Próxima imagem <span class="nav-arrow">→</span>
-        </button>
-
-        <button
-          v-else
-          class="nav-btn complete-btn"
-          @click="completeInteraction"
-        >
-          Avançar para Reflexão <span class="nav-arrow">→</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Reflexão final -->
-    <div v-if="currentStep === 'reflection'" class="vision-reflection">
-      <div class="reflection-container">
-        <h2 class="reflection-title">Refletindo sobre a Visão</h2>
-
-        <div class="reflection-content">
-          <p>Você acaba de experimentar a visão de João do Filho do Homem em toda Sua glória. Esta revelação não foi apenas para impressionar, mas para transmitir verdades profundas sobre Cristo e Sua relação com a igreja.</p>
-
-          <div class="reflection-questions">
-            <div class="question-item">
-              <h3>A Divindade Revelada</h3>
-              <p>Quando você contempla um Cristo tão poderoso e majestoso, como isso transforma sua compreensão de quem Ele é? Como o conhecimento de que Jesus não é apenas um humilde servo, mas o Senhor glorificado, afeta sua adoração?</p>
-            </div>
-
-            <div class="question-item">
-              <h3>A Presença na Igreja</h3>
-              <p>Cristo caminha entre os candeeiros de ouro - as igrejas. O que isso revela sobre o valor que Ele dá à Sua igreja e Sua presença contínua entre os crentes? Como isso desafia a maneira como vemos nossa comunidade de fé?</p>
-            </div>
-
-            <div class="question-item">
-              <h3>O Temor e o Conforto</h3>
-              <p>João cai como morto diante da visão, mas é confortado pelo toque de Cristo. Como você equilibra o temor reverente diante da santidade de Deus com a intimidade pessoal que Ele oferece? O que significa receber o "Não temas" divino?</p>
-            </div>
-          </div>
-
-          <div class="personal-application">
-            <h3>Aplicação Pessoal</h3>
-            <p>A visão do Cristo glorificado foi dada para fortalecer João e as igrejas que enfrentavam perseguição. Da mesma forma, esta revelação da verdadeira natureza de Cristo nos oferece força em nossos desafios atuais. Leve consigo esta imagem do Cristo glorificado em seu dia a dia, lembrando que o mesmo Jesus que caminhou na Galiléia é também o Rei eternamente reinante.</p>
-          </div>
-        </div>
-
-        <div class="reflection-actions">
-          <button class="btn btn-secondary" @click="completeReflection">
-            Concluir Bloco <span class="btn-icon">→</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 import ImersiveNarrative from './ImersiveNarrative.vue'
 
@@ -214,6 +12,7 @@ export default {
       interactionIndex: 0,
       activeHotspot: null,
       hasInteracted: false,
+      isFullscreen: false,
 
       // Slides para a narrativa imersiva
       visionSlides: [
@@ -372,7 +171,7 @@ export default {
               x: 45,
               y: 35,
               title: "Olhos como Chama de Fogo",
-              description: "Seus olhos não são como olhos humanos, mas queimam como chamas vivas, penetrantes e ativas. Eles parecem enxergar através de todas as camadas da realidade, conhecendo cada segredo, cada intenção oculta. Quando Ele olha para você, sente como se toda sua vida estivesse exposta - nada pode ser escondido daquele olhar.",
+              description: "Seus olhos não são como olhos humanos, mas queimam como chamas vivas, penetrantes e ativos. Eles parecem enxergar através de todas as camadas da realidade, conhecendo cada segredo, cada intenção oculta. Quando Ele olha para você, sente como se toda sua vida estivesse exposta - nada pode ser escondido daquele olhar.",
               scripture: "E os seus olhos eram como chama de fogo.",
               reference: "Apocalipse 1:14",
               reflection: "Os olhos que choram por Lázaro também flamejam com discernimento perfeito. O mesmo Jesus que vê nossas lágrimas também conhece nossos corações. Não podemos esconder nada dEle, mas também não precisamos - Ele já conhece e ainda ama."
@@ -448,8 +247,8 @@ export default {
       return this.interactiveImages[this.interactionIndex] || {}
     },
     currentHotspotData() {
-      if (this.activeHotspot === null) return {}
-      return this.currentInteractionImage.hotspots[this.activeHotspot] || {}
+      if (this.activeHotspot === null) return {};
+      return this.currentInteractionImage.hotspots[this.activeHotspot] || {};
     }
   },
   methods: {
@@ -459,6 +258,33 @@ export default {
         top: 0,
         behavior: 'smooth'
       })
+
+      // Ativar modo tela cheia imediatamente sem delay
+      this.enterFullscreen()
+    },
+
+    // Método para entrar em modo tela cheia
+    enterFullscreen() {
+      if (this.isFullscreen) return; // Evitar chamadas redundantes
+
+      this.isFullscreen = true
+      const container = this.$el
+
+      try {
+        if (container.requestFullscreen) {
+          container.requestFullscreen()
+        } else if (container.mozRequestFullScreen) {
+          container.mozRequestFullScreen()
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen()
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen()
+        }
+      } catch (e) {
+        console.error('Erro ao entrar em modo de tela cheia:', e)
+        // Definir isFullscreen como true mesmo que a API falhe,
+        // para manter a experiência visual correta
+      }
     },
 
     completeNarration() {
@@ -477,8 +303,12 @@ export default {
     },
 
     selectHotspot(index) {
-      this.activeHotspot = index
-      this.hasInteracted = true
+      if (this.activeHotspot === index) {
+        this.closeHotspot()
+      } else {
+        this.activeHotspot = index
+        this.hasInteracted = true
+      }
     },
 
     closeHotspot() {
@@ -519,20 +349,229 @@ export default {
       })
     },
 
-    completeReflection() {
+    completeReflection(action = null) {
       // Emitir evento para o componente pai saber que o bloco foi concluído
-      this.$emit('complete', 2)
+      // Passa o parâmetro 'next' se fornecido
+      this.$emit('complete', action)
+
+      // Garantir que o scroll esteja disponível
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+
+      // Garantir saída do modo tela cheia
+      if (this.isFullscreen) {
+        this.exitFullscreen();
+      }
+    },
+
+    exitFullscreen() {
+      if (!this.isFullscreen) return; // Evitar chamadas redundantes
+
+      this.isFullscreen = false;
+
+      try {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } catch (e) {
+        console.error('Erro ao sair do modo de tela cheia:', e);
+      }
+    },
+
+    toggleFullscreen() {
+      if (this.isFullscreen) {
+        this.exitFullscreen();
+        // Emitir evento para retornar à seleção de blocos
+        this.$emit('exit-fullscreen');
+      } else {
+        this.enterFullscreen();
+      }
+    },
+
+    handleFullscreenChange() {
+      // Detectar quando o usuário sai do modo tela cheia usando Esc
+      const isInFullscreenMode =
+        document.fullscreenElement === this.$el ||
+        document.webkitFullscreenElement === this.$el ||
+        document.mozFullScreenElement === this.$el ||
+        document.msFullscreenElement === this.$el;
+
+      // Atualizar o estado apenas se houver uma mudança real
+      if (this.isFullscreen !== isInFullscreenMode) {
+        this.isFullscreen = isInFullscreenMode;
+      }
+
+      // Se o usuário saiu do modo tela cheia mas ainda estamos na narrativa,
+      // tentar entrar em tela cheia novamente após um pequeno delay
+      if (!isInFullscreenMode && this.currentStep === 'narration') {
+        setTimeout(() => {
+          this.enterFullscreen();
+        }, 500);
+      }
     }
+  },
+  mounted() {
+    // Iniciar diretamente na narração sem mostrar a tela de introdução
+    // já que ela foi movida para o componente principal
+    this.startNarration();
+
+    // Adicionar listeners para eventos de mudança no modo tela cheia
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange)
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange)
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange)
+  },
+  beforeUnmount() {
+    // Remover event listeners antes de destruir o componente
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange)
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange)
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange)
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange)
+
+    // Se estiver em modo tela cheia, sair antes de desmontar
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    }
+
+    // Garantir que o scroll esteja habilitado
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
   }
 }
 </script>
+<template>
+  <div class="apocalypse-vision" :class="{ 'fullscreen-mode': isFullscreen }">
+    <div class="vision-interaction" v-if="currentStep === 'interaction'">
+      <div class="interactive-wrapper">
+        <img :src="currentInteractionImage.src" :alt="currentInteractionImage.alt" class="vision-image" :class="{ 'loaded': isImageLoaded }" @load="isImageLoaded = true" />
+        <div class="narrative-overlay" v-if="!activeHotspot && !hasInteracted" @click="hideNarrativeOverlay">
+          <div class="narrative-content">
+            <p>{{ currentInteractionImage.narrative }}</p>
+            <p class="narrative-hint">Toque nos pontos brilhantes para explorar</p>
+          </div>
+        </div>
+        <div
+          v-for="(hotspot, index) in currentInteractionImage.hotspots"
+          :key="index"
+          class="hotspot"
+          :class="{ 'pulsating': !activeHotspot, 'active': activeHotspot === index, 'hidden': activeHotspot !== null && activeHotspot !== index }"
+          :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
+          @click="selectHotspot(index)"
+        >
+          <div class="hotspot-indicator"></div>
+        </div>
+        <div class="hotspot-details" v-if="activeHotspot !== null">
+          <div class="details-header">
+            <h3>{{ currentHotspotData.title }}</h3>
+            <button class="close-btn" @click="closeHotspot">×</button>
+          </div>
+          <div class="details-content">
+            <p>{{ currentHotspotData.description }}</p>
+            <div class="scripture-reference">
+              <p class="scripture-text">"{{ currentHotspotData.scripture }}"</p>
+              <p class="scripture-verse">{{ currentHotspotData.reference }}</p>
+            </div>
+            <div class="reflection-section">
+              <h4>Reflexão</h4>
+              <p>{{ currentHotspotData.reflection }}</p>
+            </div>
+          </div>
+          <div class="hotspot-navigation">
+            <button class="nav-btn" @click="navigateHotspot('prev')" :disabled="activeHotspot === 0">
+              <span class="nav-icon">←</span> Anterior
+            </button>
+            <button class="nav-btn" @click="navigateHotspot('next')" :disabled="activeHotspot === currentInteractionImage.hotspots.length - 1">
+              Próximo <span class="nav-icon">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
+      <div class="interaction-navigation">
+        <button class="nav-btn" @click="previousImage" :disabled="interactionIndex === 0">
+          <span class="nav-arrow">←</span> Anterior
+        </button>
+        <div class="image-info">
+          <span class="current-image">Imagem {{ interactionIndex + 1 }} de {{ interactiveImages.length }}</span>
+        </div>
+        <button class="nav-btn" @click="nextImage" :disabled="interactionIndex === interactiveImages.length - 1">
+          Próxima <span class="nav-arrow">→</span>
+        </button>
+        <button class="complete-btn" @click="completeInteraction">
+          Concluir Interação
+        </button>
+      </div>
+    </div>
+
+    <ImersiveNarrative
+      v-if="currentStep === 'narration'"
+      :slides="visionSlides"
+      :typing-speed="40"
+      :auto-start-typing="true"
+      :auto-fullscreen="true"
+      @complete="completeNarration"
+      @exit-fullscreen="$emit('exit-fullscreen')"
+    />
+
+    <div class="vision-reflection" v-if="currentStep === 'reflection'">
+      <h2 class="reflection-title">Reflexão Final</h2>
+      <div class="reflection-content">
+        <p>Reflita sobre o que você aprendeu durante esta jornada imersiva. Como essas verdades sobre Cristo glorificado podem impactar sua vida diária?</p>
+        <div class="reflection-questions">
+          <div class="question-item">
+            <h3>A Visão do Glorificado</h3>
+            <p>Como a visão de Cristo em Sua glória muda sua perspectiva sobre quem Ele é? De que maneira esta visão complementa a imagem do Jesus humilde dos evangelhos?</p>
+          </div>
+          <div class="question-item">
+            <h3>Imagens de Autoridade</h3>
+            <p>Quais símbolos de autoridade e poder divino mais te impactaram? De que forma estes símbolos trazem conforto em tempos de perseguição e dificuldade?</p>
+          </div>
+          <div class="question-item">
+            <h3>Aplicação Pessoal</h3>
+            <p>Se Jesus caminha entre os candeeiros (as igrejas) hoje, o que Ele veria na sua vida espiritual e na sua comunidade de fé? Como esta compreensão pode transformar sua adoração?</p>
+          </div>
+        </div>
+        <div class="personal-application">
+          <h3>Aplicação Pessoal</h3>
+          <p>Reserve um momento para refletir sobre como esta experiência da visão de João impactou sua compreensão de Cristo e da igreja. Considere compartilhar estas reflexões com alguém em sua comunidade de fé.</p>
+        </div>
+        <div class="reflection-actions">
+          <button class="complete-btn" @click="completeReflection('next')">
+            Completar Reflexão
+          </button>
+        </div>
+      </div>
+    </div>
+
+      <button class="fullscreen-btn" @click="toggleFullscreen" v-if="currentStep === 'interaction'">
+        <span class="fullscreen-icon">{{ isFullscreen ? '⟲' : '⟱' }}</span>
+      </button>
+    </div>
+  </template>
 <style scoped>
 .apocalypse-vision {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
   animation: fadeIn 1s ease;
+  position: relative;
+  transition: all 0.5s ease;
+}
+
+.fullscreen-mode {
+  height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  padding: 0;
+  margin: 0;
+  overflow: auto;
+  z-index: 9999;
 }
 
 .block-header {
@@ -551,76 +590,6 @@ export default {
   font-size: 1.1rem;
   font-style: italic;
   font-family: var(--font-family-quote);
-}
-
-/* Introdução */
-.vision-intro {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: var(--space-xl);
-  margin-bottom: var(--space-xl);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-lg);
-}
-
-.intro-content p {
-  text-align: center;
-  margin-bottom: var(--space-lg);
-  line-height: 1.7;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.intro-steps {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-xl);
-  margin: var(--space-xl) 0;
-}
-.intro-step {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-  max-width: 300px;
-}
-
-.step-icon {
-  font-size: 2rem;
-  color: var(--color-secondary);
-  min-width: 40px;
-  text-align: center;
-}
-
-.step-info h4 {
-  margin-bottom: var(--space-xs);
-  color: var(--color-secondary-light);
-  font-size: 1.1rem;
-}
-
-.step-info p {
-  font-size: 0.95rem;
-  text-align: left;
-  margin-bottom: 0;
-  line-height: 1.6;
-}
-
-.begin-btn {
-  margin-top: var(--space-lg);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-lg);
-  font-size: 1.1rem;
-}
-
-.btn-icon {
-  transition: transform var(--transition-fast);
-}
-
-.begin-btn:hover .btn-icon {
-  transform: translateX(5px);
 }
 
 /* Estilização para a seção de interação */
@@ -680,6 +649,34 @@ export default {
   animation: pulse 2s infinite ease-in-out;
 }
 
+/* Botão de tela cheia */
+.fullscreen-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.fullscreen-btn:hover {
+  background-color: rgba(75, 46, 131, 0.7);
+  transform: translateY(-2px);
+}
+
+.fullscreen-icon {
+  font-size: 1.4rem;
+}
+
 @keyframes pulse {
   0% { opacity: 0.7; }
   50% { opacity: 1; }
@@ -720,7 +717,6 @@ export default {
   50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
 }
-
 .hotspot.active .hotspot-indicator {
   background-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.5), 0 0 15px var(--color-primary);
@@ -838,7 +834,6 @@ export default {
   background-color: var(--color-background-alt);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
-
 .image-info {
   text-align: center;
 }
@@ -962,7 +957,6 @@ export default {
   opacity: 0;
   transform: translateY(20px);
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -972,6 +966,10 @@ export default {
 @media (max-width: 768px) {
   .apocalypse-vision {
     padding: 1rem 0.5rem;
+  }
+
+  .fullscreen-mode {
+    padding: 0;
   }
 
   .block-title {
@@ -1032,6 +1030,164 @@ export default {
   .begin-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .fullscreen-btn {
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Suporte para telas pequenas */
+@media (max-width: 480px) {
+  .block-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .hotspot {
+    width: 44px; /* Área de toque ligeiramente aumentada para telas menores */
+    height: 44px;
+  }
+
+  .details-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .scripture-text,
+  .details-content p {
+    font-size: 0.9rem;
+  }
+
+  .question-item {
+    padding: var(--space-sm);
+  }
+
+  .question-item h3 {
+    font-size: 1.1rem;
+  }
+
+  .personal-application {
+    padding: var(--space-md);
+  }
+}
+
+/* Melhorias de acessibilidade */
+.hotspot:focus .hotspot-indicator,
+.nav-btn:focus,
+.close-btn:focus,
+.begin-btn:focus,
+.fullscreen-btn:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Animações aprimoradas */
+@keyframes floatIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.question-item {
+  animation: floatIn 0.5s ease-out forwards;
+  animation-delay: calc(var(--index, 0) * 0.1s);
+}
+
+.question-item:nth-child(1) { --index: 1; }
+.question-item:nth-child(2) { --index: 2; }
+.question-item:nth-child(3) { --index: 3; }
+
+/* Efeitos de hover aprimorados */
+.nav-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.hotspot:hover .hotspot-indicator {
+  box-shadow: 0 0 0 4px rgba(196, 180, 84, 0.3), 0 0 15px var(--color-secondary);
+}
+
+/* Estilização da barra de rolagem para os painéis com scroll */
+.hotspot-details::-webkit-scrollbar,
+.reflection-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hotspot-details::-webkit-scrollbar-track,
+.reflection-content::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+.hotspot-details::-webkit-scrollbar-thumb,
+.reflection-content::-webkit-scrollbar-thumb {
+  background-color: rgba(196, 180, 84, 0.3);
+  border-radius: 4px;
+}
+
+.hotspot-details::-webkit-scrollbar-thumb:hover,
+.reflection-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(196, 180, 84, 0.5);
+}
+
+/* Estado de carregamento e transições refinadas */
+.vision-image {
+  transition: opacity 0.5s ease, transform 1s ease;
+  opacity: 0;
+}
+
+.vision-image.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vision-image:not(.loaded) {
+  transform: scale(0.98);
+}
+
+/* Estado de foco para acessibilidade */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Estilos de impressão para quando o usuário quiser imprimir a reflexão */
+@media print {
+  .apocalypse-vision {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .block-header,
+  .vision-reflection {
+    border: none;
+    box-shadow: none;
+    background: none;
+  }
+
+  .nav-btn,
+  .interaction-navigation,
+  .begin-btn,
+  .fullscreen-btn {
+    display: none !important;
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .reflection-title,
+  .question-item h3,
+  .personal-application h3 {
+    color: #333 !important;
+  }
+
+  .question-item,
+  .personal-application {
+    border: 1px solid #ccc;
+    background: none;
   }
 }
 </style>

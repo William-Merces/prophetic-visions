@@ -55,15 +55,13 @@
         </h3>
       </div>
 
-      <div class="chapter-intro">
-        <h2 class="chapter-intro-title">A Visão do Filho do Homem</h2>
-        <p class="chapter-intro-description">
-          Explore a primeira visão do Apocalipse, onde João vê Cristo glorificado caminhando entre sete candeeiros de ouro.
-        </p>
-      </div>
-
       <!-- Renderiza o capítulo 1 usando o componente específico -->
-      <ApocalypseChapter1 v-if="currentChapter === 1" @complete="chapterCompleted" />
+      <ApocalypseChapter1
+        v-if="currentChapter === 1"
+        @complete="chapterCompleted"
+        @return-to-selection="returnToBlockSelection"
+        :key="componentKey"
+      />
 
       <!-- Placeholder para outros capítulos -->
       <div v-else class="chapter-placeholder">
@@ -98,6 +96,8 @@ export default {
   data() {
     return {
       currentChapter: null,
+      componentKey: 0, // Para forçar a remontagem do componente quando necessário
+      lastCompletedBlock: null,
       chapterTitles: {
         1: "A Visão do Filho do Homem",
         2: "Mensagens às Igrejas de Éfeso e Esmirna",
@@ -137,23 +137,47 @@ export default {
     selectChapter(chapterNum) {
       if (this.isChapterAvailable(chapterNum)) {
         this.currentChapter = chapterNum;
+        this.componentKey += 1; // Forçar remontagem do componente
 
         // Rolagem suave para o topo da página
         window.scrollTo({
           top: 0,
           behavior: 'smooth'
         });
+
+        // Garantir que o scroll esteja habilitado
+        document.body.style.overflow = 'auto';
+        document.body.style.height = 'auto';
       }
     },
 
     returnToChapters() {
       this.currentChapter = null;
+      this.lastCompletedBlock = null;
 
       // Rolagem suave para o topo da página
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
+
+      // Garantir que o scroll esteja habilitado
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+    },
+
+    returnToBlockSelection(blockId) {
+      // Esta função é chamada quando um bloco é concluído e queremos voltar para a seleção
+      this.lastCompletedBlock = blockId;
+      // Atualizar a chave para forçar remontagem do componente
+      this.componentKey += 1;
+
+      // Garantir que o scroll esteja habilitado
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+
+      // Se necessário, podemos adicionar lógica adicional aqui
+      console.log(`Bloco ${blockId} concluído, retornando para seleção`);
     },
 
     chapterCompleted() {
@@ -199,6 +223,15 @@ export default {
     if (chapterParam && this.isChapterAvailable(chapterParam)) {
       this.selectChapter(chapterParam);
     }
+
+    // Garantir que o scroll esteja habilitado
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+  },
+  beforeUnmount() {
+    // Garantir que as propriedades do body sejam restauradas
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
   }
 }
 </script>
@@ -437,33 +470,7 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Chapter intro */
-.chapter-intro {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-  padding: var(--space-xl);
-  background: linear-gradient(145deg, rgba(75, 46, 131, 0.2), rgba(0, 0, 0, 0.5));
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-secondary);
-  box-shadow: 0 0 20px rgba(196, 180, 84, 0.1);
-}
-
-.chapter-intro-title {
-  font-size: 2.2rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-  text-shadow: 0 0 10px rgba(196, 180, 84, 0.3);
-}
-
-.chapter-intro-description {
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: 1.7;
-  font-size: 1.1rem;
-  color: var(--color-text);
-}
-
-/* Placeholder for unavailable chapters */
+/* Placeholder para capítulos não disponíveis */
 .chapter-placeholder {
   padding: var(--space-xxl) var(--space-lg);
   background-color: var(--color-surface);
@@ -510,13 +517,13 @@ export default {
   font-weight: 500;
 }
 
-/* Animations */
+/* Animações */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-/* Responsiveness */
+/* Responsividade */
 @media (max-width: 768px) {
   .experience-header h1 {
     font-size: 2.5rem;
@@ -544,9 +551,25 @@ export default {
     order: -1;
     font-size: 1.3rem;
   }
+}
 
-  .chapter-intro-title {
-    font-size: 1.8rem;
+/* Telas muito pequenas */
+@media (max-width: 375px) {
+  .chapter-title {
+    font-size: 1.5rem;
+  }
+
+  .nav-btn {
+    font-size: 0.8rem;
+    padding: var(--space-xs) var(--space-md);
+  }
+
+  .block-icon {
+    font-size: 2rem;
+  }
+
+  .block-title {
+    font-size: 1.1rem;
   }
 }
 </style>

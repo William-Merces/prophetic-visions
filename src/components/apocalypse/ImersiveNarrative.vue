@@ -15,7 +15,11 @@
     </div>
 
     <!-- Container de conteúdo narrativo -->
-    <div class="narrative-content">
+    <div
+      class="narrative-content"
+      v-touch:swipe.left="nextSlide"
+      v-touch:swipe.right="previousSlide"
+    >
       <!-- Cabeçalho e título do bloco narrativo -->
       <div class="narrative-header">
         <h2 v-if="blockTitle" class="block-title">{{ blockTitle }}</h2>
@@ -31,7 +35,10 @@
       </div>
 
       <!-- Conteúdo do slide atual -->
-      <div class="slide-container">
+      <div
+        class="slide-container"
+        v-touch:tap="isTypingComplete ? null : completeTyping"
+      >
         <transition name="fade" mode="out-in">
           <div :key="currentIndex" class="slide-content">
             <h3 v-if="currentSlide.title" class="slide-title">{{ currentSlide.title }}</h3>
@@ -98,7 +105,7 @@
     <!-- Controle de tela cheia -->
     <button
       class="fullscreen-btn"
-      @click="toggleFullscreen"
+      @click="exitFullscreenAndReturn"
       :aria-label="isFullscreen ? 'Sair da tela cheia' : 'Modo tela cheia'"
     >
       <span class="fullscreen-icon">{{ isFullscreen ? '⟲' : '⟱' }}</span>
@@ -127,6 +134,10 @@ export default {
     autoStartTyping: {
       type: Boolean,
       default: true
+    },
+    autoFullscreen: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -139,7 +150,14 @@ export default {
       isTypingComplete: false,
       typingLineIndex: 0,
       typingCharIndex: 0,
-      typingTimeout: null
+      typingTimeout: null,
+      // Controle de zoom
+      scale: 1,
+      startDistance: 0,
+      isPinching: false,
+      // Controle de gestos
+      touchStartX: 0,
+      touchEndX: 0
     }
   },
   computed: {
@@ -179,34 +197,47 @@ export default {
     },
     completeBlock() {
       // Emite evento quando o usuário termina este bloco narrativo
-      this.$emit('complete')
+      // Agora inclui um parâmetro para indicar que deve ir para o próximo
+      this.$emit('complete', 'next')
     },
-    toggleFullscreen() {
-      this.isFullscreen = !this.isFullscreen
-
-      // Implementação do modo tela cheia usando a API Fullscreen
+    enterFullscreen() {
       const container = this.$el
 
+      this.isFullscreen = true
+
+      if (container.requestFullscreen) {
+        container.requestFullscreen()
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen()
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen()
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen()
+      }
+    },
+    exitFullscreen() {
+      this.isFullscreen = false
+
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen()
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen()
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen()
+      }
+    },
+    exitFullscreenAndReturn() {
+      this.exitFullscreen();
+      // Emite evento para retornar à seleção de blocos
+      this.$emit('exit-fullscreen');
+    },
+    toggleFullscreen() {
       if (this.isFullscreen) {
-        if (container.requestFullscreen) {
-          container.requestFullscreen()
-        } else if (container.mozRequestFullScreen) {
-          container.mozRequestFullScreen()
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen()
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen()
-        }
+        this.exitFullscreen()
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen()
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen()
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen()
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen()
-        }
+        this.enterFullscreen()
       }
     },
     handleFullscreenChange() {
@@ -255,6 +286,72 @@ export default {
       this.isTypingComplete = false
       this.typingLineIndex = 0
       this.typingCharIndex = 0
+    },
+
+    // Métodos para controlar gestos
+    handleTouchStart(event) {
+      if (event.touches.length === 1) {
+        // Armazenar posição inicial para detectar deslize horizontal
+        this.touchStartX = event.touches[0].clientX;
+      } else if (event.touches.length === 2) {
+        // Iniciar gesto de pinça para zoom
+        this.isPinching = true;
+        this.startDistance = Math.hypot(
+          event.touches[0].clientX - event.touches[1].clientX,
+          event.touches[0].clientY - event.touches[1].clientY
+        );
+      }
+    },
+
+    handleTouchMove(event) {
+      if (event.touches.length === 2 && this.isPinching) {
+        // Calcular nova distância para zoom
+        const currentDistance = Math.hypot(
+          event.touches[0].clientX - event.touches[1].clientX,
+          event.touches[0].clientY - event.touches[1].clientY
+        );
+
+        // Calcular novo fator de escala
+        let newScale = this.scale * (currentDistance / this.startDistance);
+
+        // Limitar o zoom entre 0.8 e 3
+        newScale = Math.min(Math.max(newScale, 0.8), 3);
+
+        // Aplicar zoom na imagem
+        const backgroundImage = this.$el.querySelector('.background-image');
+        if (backgroundImage) {
+          backgroundImage.style.transform = `scale(${newScale})`;
+          this.scale = newScale;
+        }
+
+        // Atualizar distância inicial para o próximo cálculo
+        this.startDistance = currentDistance;
+
+        // Prevenir comportamento padrão para evitar rolagem ou zoom do navegador
+        event.preventDefault();
+      }
+    },
+
+    handleTouchEnd(event) {
+      if (event.touches.length < 2) {
+        this.isPinching = false;
+      }
+
+      if (event.changedTouches.length > 0 && !this.isPinching) {
+        this.touchEndX = event.changedTouches[0].clientX;
+
+        // Detectar direção do deslize
+        const diffX = this.touchEndX - this.touchStartX;
+        const threshold = 50; // Distância mínima para considerar como deslize
+
+        if (diffX > threshold) {
+          // Deslize para a direita
+          this.previousSlide();
+        } else if (diffX < -threshold) {
+          // Deslize para a esquerda
+          this.nextSlide();
+        }
+      }
     }
   },
   mounted() {
@@ -268,6 +365,19 @@ export default {
     if (this.autoStartTyping) {
       this.startTyping()
     }
+
+    // Entrar automaticamente em modo tela cheia
+    if (this.autoFullscreen) {
+      // Pequeno atraso para garantir que o DOM esteja pronto
+      setTimeout(() => {
+        this.enterFullscreen()
+      }, 300)
+    }
+
+    // Adicionar eventos de touch para gestos de zoom e swipe
+    this.$el.addEventListener('touchstart', this.handleTouchStart, { passive: false })
+    this.$el.addEventListener('touchmove', this.handleTouchMove, { passive: false })
+    this.$el.addEventListener('touchend', this.handleTouchEnd, { passive: false })
   },
   beforeUnmount() {
     // Limpar timeouts e remover event listeners
@@ -276,6 +386,16 @@ export default {
     document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange)
     document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange)
     document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange)
+
+    // Remover eventos de touch
+    this.$el.removeEventListener('touchstart', this.handleTouchStart)
+    this.$el.removeEventListener('touchmove', this.handleTouchMove)
+    this.$el.removeEventListener('touchend', this.handleTouchEnd)
+
+    // Sair do modo tela cheia ao desmontar
+    if (this.isFullscreen) {
+      this.exitFullscreen()
+    }
   }
 }
 </script>
@@ -293,11 +413,13 @@ export default {
   display: flex;
   flex-direction: column;
   transition: all 0.5s ease;
+  touch-action: pan-x pan-y;
 }
 
 .fullscreen {
   height: 100vh;
   border-radius: 0;
+  z-index: 9999;
 }
 
 /* Background e imagem */
@@ -316,7 +438,8 @@ export default {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 1.5s ease;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
 }
 
 .overlay {
@@ -327,6 +450,7 @@ export default {
   bottom: 0;
   background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.4));
   z-index: 2;
+  pointer-events: none;
 }
 
 /* Variações de overlay */
@@ -351,6 +475,7 @@ export default {
   justify-content: space-between;
   height: 100%;
   padding: 2rem;
+  touch-action: manipulation; /* Melhorar comportamento de toque */
 }
 
 /* Cabeçalho e título */
@@ -377,12 +502,15 @@ export default {
 }
 
 .progress-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
+  /* Aumentar a área clicável */
+  padding: 5px;
+  margin: -5px;
 }
 
 .progress-dot.active {
@@ -401,6 +529,7 @@ export default {
   justify-content: center;
   overflow: hidden;
   margin: 2rem 0;
+  touch-action: pan-y; /* Permitir rolagem vertical */
 }
 
 .slide-content {
@@ -454,18 +583,20 @@ export default {
   background-color: rgba(0, 0, 0, 0.6);
   color: var(--color-text);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.6rem 1.2rem;
+  padding: 0.8rem 1.5rem; /* Botões maiores para facilitar toque */
   border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-family-heading);
-  font-size: 0.9rem;
+  font-size: 1rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 100px; /* Garantir área mínima de toque */
+  justify-content: center;
 }
 
-.nav-btn:hover:not(:disabled) {
+.nav-btn:hover:not(:disabled), .nav-btn:active:not(:disabled) {
   background-color: rgba(75, 46, 131, 0.7);
   transform: translateY(-2px);
 }
@@ -484,7 +615,7 @@ export default {
   color: var(--color-background);
 }
 
-.complete-btn:hover:not(:disabled) {
+.complete-btn:hover:not(:disabled), .complete-btn:active:not(:disabled) {
   background-color: var(--color-secondary-light);
 }
 
@@ -496,8 +627,8 @@ export default {
   background-color: rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--color-text);
-  width: 40px;
-  height: 40px;
+  width: 50px; /* Botão maior para facilitar toque */
+  height: 50px; /* Botão maior para facilitar toque */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -507,13 +638,13 @@ export default {
   z-index: 10;
 }
 
-.fullscreen-btn:hover {
+.fullscreen-btn:hover, .fullscreen-btn:active {
   background-color: rgba(75, 46, 131, 0.7);
   transform: translateY(-2px);
 }
 
 .fullscreen-icon {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 
 /* Transições */
@@ -524,10 +655,25 @@ export default {
   opacity: 0;
 }
 
+/* Feedback visual para toques */
+@media (hover: hover) {
+  .nav-btn:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (hover: none) {
+  .nav-btn:active {
+    transform: translateY(-2px);
+    background-color: rgba(75, 46, 131, 0.7);
+  }
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .immersive-narrative {
-    height: 85vh;
+    height: 100vh; /* Sempre altura total em mobile */
+    border-radius: 0; /* Sem bordas arredondadas em mobile */
   }
 
   .narrative-content {
@@ -547,14 +693,36 @@ export default {
   }
 
   .narrative-controls {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* Manter botões lado a lado em mobile */
+    flex-wrap: wrap; /* Permitir quebra de linha se necessário */
     gap: 0.5rem;
   }
 
   .nav-btn {
+    flex: 1;
+    min-width: 0; /* Permitir que os botões se ajustem ao espaço disponível */
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+  }
+
+  /* Melhoria para a área de toque nos pontos de progresso */
+  .progress-dot {
+    width: 14px;
+    height: 14px;
+    padding: 7px;
+    margin: -7px;
+  }
+}
+
+/* Especificamente para telas muito pequenas */
+@media (max-width: 375px) {
+  .narrative-controls {
+    flex-direction: column; /* Empilhar botões em telas muito pequenas */
     width: 100%;
-    justify-content: center;
+  }
+
+  .nav-btn {
+    width: 100%;
   }
 }
 </style>
