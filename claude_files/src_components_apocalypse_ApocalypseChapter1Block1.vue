@@ -172,8 +172,7 @@ export default {
   methods: {
     completeBlock(action = null) {
       // Emitir evento para indicar que o bloco foi concluído
-      // Alterado para sempre passar 'next' como ação padrão, garantindo navegação para o próximo bloco
-      this.$emit('complete', 1, action || 'next');
+      this.$emit('complete', 1, action);
     },
 
     nextReflectionQuestion() {

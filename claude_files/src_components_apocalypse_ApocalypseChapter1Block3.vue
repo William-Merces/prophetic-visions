@@ -161,7 +161,7 @@ export default {
               scripture: 'E a sua voz era como a voz de muitas águas.',
               reference: 'Apocalipse 1:15',
               theological: 'A voz como muitas águas evoca o poder esmagador de cataratas ou do oceano - irresistível, majestosa e autorizada. É a voz do Criador que falou e o universo veio à existência.',
-              application: 'Quando Cristo fala, devemos prestar atenção total. A palavra de Deus não é uma sugestão casual, mas uma proclamação autoritativa que merece nossa completa atenção e resposta.'
+              application: 'Quando Cristo fala, devemos ouvir. Sua palavra tem autoridade sobre toda a criação e sobre nossas vidas. Precisamos estar atentos à Sua voz acima do barulho do mundo.'
             }
           ]
         },
@@ -268,14 +268,6 @@ export default {
         this.activeSymbol = null
       } else {
         this.activeSymbol = index
-
-        // Rolar para o símbolo para garantir que seja visível
-        this.$nextTick(() => {
-          const symbolElement = document.querySelector('.symbol-card.active');
-          if (symbolElement) {
-            symbolElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        });
       }
     },
 
@@ -283,14 +275,6 @@ export default {
       // Emitir evento para indicar que o bloco foi concluído
       this.$emit('complete', 3)
     }
-  },
-  mounted() {
-    // Garantir que o scroll esteja disponível
-    document.body.style.overflow = 'auto';
-  },
-  beforeUnmount() {
-    // Garantir que o scroll seja restaurado quando o componente for desmontado
-    document.body.style.overflow = 'auto';
   }
 }
 </script>
@@ -301,10 +285,6 @@ export default {
   margin: 0 auto;
   padding: 1rem;
   animation: fadeIn 1s ease;
-  /* Remover height/overflow limitantes que possam impedir o scroll */
-  min-height: initial;
-  max-height: initial;
-  overflow: visible;
 }
 
 .block-header {
@@ -332,35 +312,31 @@ export default {
   gap: var(--space-md);
   margin-bottom: var(--space-xl);
   flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  background-color: var(--color-background);
-  padding: var(--space-md) 0;
-  z-index: 5;
 }
 
 .tab-button {
   background-color: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--color-text);
   padding: var(--space-sm) var(--space-lg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
-  font-family: var(--font-family-heading);
   cursor: pointer;
   transition: all var(--transition-normal);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  font-family: var(--font-family-heading);
 }
 
 .tab-button.active {
   background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-light);
-  box-shadow: 0 0 10px rgba(75, 46, 131, 0.5);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 10px rgba(196, 180, 84, 0.3);
 }
 
 .tab-button:hover:not(.active) {
   background-color: rgba(75, 46, 131, 0.3);
+  transform: translateY(-2px);
 }
 
 .tab-icon {
@@ -543,7 +519,6 @@ export default {
 .block-navigation {
   margin-top: var(--space-xl);
   text-align: center;
-  padding-bottom: var(--space-xl); /* Adicionar espaço ao final para evitar cortes */
 }
 
 .btn-secondary {
@@ -580,7 +555,6 @@ export default {
   .symbol-tabs {
     flex-direction: column;
     gap: var(--space-sm);
-    position: relative; /* Não usar sticky em celulares */
   }
 
   .tab-button {

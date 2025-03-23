@@ -64,25 +64,19 @@
 
     <!-- Navegação entre blocos (quando não estiver em um bloco específico) -->
     <div v-if="!activeBlock && !showIntroduction" class="blocks-navigation">
-      <p class="blocks-instruction">Siga a jornada em sequência:</p>
-      <div class="journey-path-indicator">
-        <div class="journey-line"></div>
-      </div>
+      <p class="blocks-instruction">Escolha uma parte da experiência:</p>
       <div class="blocks-grid">
         <div
-          v-for="(block, index) in blocks"
+          v-for="block in blocks"
           :key="block.id"
           class="block-card"
           :class="{
             'completed': completedBlocks.includes(block.id),
-            'pulse-attention': needsAttention && !completedBlocks.includes(block.id) && (completedBlocks.length === index || completedBlocks.length === 0 && index === 0),
-            'highlight-recent': lastCompletedBlock === block.id,
-            'next-in-sequence': isNextInSequence(block.id),
-            'disabled': !isAvailableForSelection(block.id)
+            'pulse-attention': needsAttention && !completedBlocks.includes(block.id),
+            'highlight-recent': lastCompletedBlock === block.id
           }"
           @click="selectBlock(block.id)"
         >
-          <div class="sequence-indicator">{{ index + 1 }}</div>
           <div class="block-content">
             <div class="block-icon">{{ block.icon }}</div>
             <h3 class="block-title">{{ block.title }}</h3>
@@ -91,24 +85,16 @@
               <span v-if="completedBlocks.includes(block.id)" class="status-completed">
                 <span class="check-icon">✓</span> Concluído
               </span>
-              <span v-else-if="isNextInSequence(block.id)" class="status-available">
-                <span class="tap-icon">👆</span> Disponível
-              </span>
-              <span v-else class="status-locked">
-                <span class="lock-icon">🔒</span> Complete as etapas anteriores
+              <span v-else class="status-available">
+                <span class="tap-icon">👆</span> Toque para iniciar
               </span>
             </div>
             <div class="block-action-hint">
               <button
                 class="start-btn"
-                :class="{
-                  'completed-btn': completedBlocks.includes(block.id),
-                  'next-btn': isNextInSequence(block.id) && !completedBlocks.includes(block.id),
-                  'disabled-btn': !isAvailableForSelection(block.id)
-                }"
-                :disabled="!isAvailableForSelection(block.id)"
+                :class="{'completed-btn': completedBlocks.includes(block.id)}"
               >
-                {{ completedBlocks.includes(block.id) ? 'Revisitar' : isNextInSequence(block.id) ? 'Iniciar' : 'Bloqueado' }}
+                {{ completedBlocks.includes(block.id) ? 'Revisitar' : 'Iniciar Experiência' }}
               </button>
             </div>
           </div>
@@ -231,34 +217,6 @@ export default {
     }
   },
   methods: {
-    // Verifica se um bloco está disponível para seleção
-    isAvailableForSelection(blockId) {
-      // Se o bloco já foi concluído, sempre está disponível
-      if (this.completedBlocks.includes(blockId)) {
-        return true;
-      }
-
-      // O primeiro bloco está sempre disponível
-      if (blockId === 1 && this.completedBlocks.length === 0) {
-        return true;
-      }
-
-      // Outros blocos estão disponíveis apenas se o bloco anterior foi concluído
-      return this.completedBlocks.includes(blockId - 1);
-    },
-
-    // Verifica se um bloco é o próximo na sequência
-    isNextInSequence(blockId) {
-      // Se não há blocos concluídos, apenas o primeiro bloco é o próximo
-      if (this.completedBlocks.length === 0) {
-        return blockId === 1;
-      }
-
-      // O próximo bloco na sequência é aquele cujo ID é (último concluído + 1)
-      const maxCompletedBlockId = Math.max(...this.completedBlocks);
-      return blockId === maxCompletedBlockId + 1;
-    },
-
     showIntroScreen() {
       // Mostrar a tela de introdução quando o usuário clica em "Toque para iniciar"
       this.showTutorial = true;
@@ -276,19 +234,6 @@ export default {
     },
 
     selectBlock(blockId) {
-      // Permitir seleção apenas se o bloco estiver disponível
-      if (!this.isAvailableForSelection(blockId)) {
-        // Fornecer feedback visual ou mensagem indicando que precisa seguir a sequência
-        const blockElement = document.querySelector(`.block-card[data-id="${blockId}"]`);
-        if (blockElement) {
-          blockElement.classList.add('shake-animation');
-          setTimeout(() => {
-            blockElement.classList.remove('shake-animation');
-          }, 500);
-        }
-        return;
-      }
-
       this.activeBlock = blockId;
       this.dismissTutorial();
       this.showIntroduction = false;
@@ -668,33 +613,12 @@ export default {
   to { text-shadow: 0 0 10px rgba(196, 180, 84, 0.8); }
 }
 
-/* Indicador de caminho da jornada */
-.journey-path-indicator {
-  position: relative;
-  height: 4px;
-  margin: 0 auto var(--space-lg);
-  max-width: 80%;
-}
-
-.journey-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, var(--color-secondary), var(--color-primary));
-  border-radius: 2px;
-}
-
 .blocks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-lg);
   margin-bottom: var(--space-xl);
   animation: fadeIn 1s ease;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .block-card {
@@ -714,7 +638,7 @@ export default {
 }
 
 .block-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
@@ -727,72 +651,45 @@ export default {
   pointer-events: none;
 }
 
-.block-card.completed {
-  border-color: var(--color-secondary);
-  background-color: rgba(196, 180, 84, 0.1);
-}
-
-.block-card.next-in-sequence {
-  border-color: var(--color-primary-light);
-  box-shadow: 0 0 15px rgba(75, 46, 131, 0.4);
-  animation: highlightNextStep 2s infinite alternate;
-}
-
-@keyframes highlightNextStep {
-  from { box-shadow: 0 0 10px rgba(75, 46, 131, 0.4); }
-  to { box-shadow: 0 0 20px rgba(75, 46, 131, 0.7); }
-}
-
-.block-card.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.block-card:not(.disabled):hover {
+.block-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
   background-color: rgba(75, 46, 131, 0.3);
 }
 
-.block-card:not(.disabled):hover::after {
+.block-card:hover::after {
   opacity: 0.4;
   transform: scale(1);
 }
 
-.block-card:not(.disabled):active {
+.block-card:active {
   transform: translateY(0);
   transition: transform 0.2s ease;
 }
 
-/* Indicador de sequência */
-.sequence-indicator {
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  width: 30px;
-  height: 30px;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  border: 2px solid var(--color-text-muted);
-  z-index: 2;
+.block-card.completed {
+  border-color: var(--color-secondary);
+  background-color: rgba(196, 180, 84, 0.1);
 }
 
-.block-card.completed .sequence-indicator {
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  border-color: var(--color-secondary-light);
+.block-card.highlight-completed {
+  animation: highlightSuccess 2s ease;
 }
 
-.block-card.next-in-sequence .sequence-indicator {
-  background-color: var(--color-primary);
-  color: var(--color-text);
-  border-color: var(--color-primary-light);
-  animation: pulse 2s infinite;
+.block-card.highlight-recent {
+  border: 2px solid var(--color-secondary);
+  box-shadow: 0 0 20px rgba(196, 180, 84, 0.5);
+  animation: pulseRecent 2s infinite alternate;
+}
+
+@keyframes pulseRecent {
+  from { box-shadow: 0 0 10px rgba(196, 180, 84, 0.3); }
+  to { box-shadow: 0 0 20px rgba(196, 180, 84, 0.7); }
+}
+
+@keyframes highlightSuccess {
+  0%, 100% { box-shadow: var(--shadow-md); }
+  50% { box-shadow: 0 0 30px rgba(196, 180, 84, 0.6); }
 }
 
 .block-content {
@@ -810,7 +707,7 @@ export default {
   transition: transform 0.3s ease;
 }
 
-.block-card:not(.disabled):hover .block-icon {
+.block-card:hover .block-icon {
   transform: scale(1.1);
 }
 
@@ -852,22 +749,6 @@ export default {
   gap: var(--space-xs);
 }
 
-.status-available {
-  color: var(--color-primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-}
-
-.status-locked {
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-}
-
 .check-icon {
   background-color: var(--color-secondary);
   color: var(--color-background);
@@ -880,14 +761,18 @@ export default {
   font-size: 12px;
 }
 
+.status-available {
+  color: var(--color-text);
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
 .tap-icon {
   animation: tapPulse 1.5s infinite;
   transform-origin: bottom center;
-}
-
-.lock-icon {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
 }
 
 @keyframes tapPulse {
@@ -916,25 +801,7 @@ export default {
   border: 1px solid var(--color-secondary);
 }
 
-.next-btn {
-  background-color: var(--color-primary-light);
-  box-shadow: 0 0 10px rgba(196, 180, 84, 0.3);
-  animation: subtlePulse 2s infinite alternate;
-}
-
-@keyframes subtlePulse {
-  from { box-shadow: 0 0 5px rgba(196, 180, 84, 0.3); }
-  to { box-shadow: 0 0 15px rgba(196, 180, 84, 0.5); }
-}
-
-.disabled-btn {
-  background-color: rgba(100, 100, 100, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-}
-
-.block-card:not(.disabled):hover .start-btn:not(.disabled-btn) {
+.block-card:hover .start-btn {
   background-color: var(--color-secondary-light);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -948,17 +815,6 @@ export default {
 @keyframes pulseAttention {
   0%, 100% { transform: translateY(0); box-shadow: var(--shadow-md); }
   50% { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(196, 180, 84, 0.4); }
-}
-
-/* Animação de feedback quando usuário tenta acessar um bloco bloqueado */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.shake-animation {
-  animation: shake 0.5s;
 }
 
 .active-block-container {
@@ -1058,7 +914,6 @@ export default {
   margin-top: var(--space-xxl);
   padding-top: var(--space-lg);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
 }
 
 .scripture-reference {
@@ -1109,7 +964,6 @@ export default {
   padding: var(--space-md);
   animation: fadeIn 0.5s ease;
   backdrop-filter: blur(5px);
-  overflow-y: auto; /* Permitir rolagem se o conteúdo for muito grande */
 }
 
 .tutorial-content {
@@ -1122,11 +976,6 @@ export default {
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-secondary);
   animation: scaleIn 0.5s ease;
-  max-height: 90vh; /* Limitar altura máxima */
-  overflow-y: auto; /* Permitir rolagem interna */
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
 }
 
 @keyframes scaleIn {
@@ -1142,9 +991,6 @@ export default {
 
 .tutorial-steps {
   margin: var(--space-lg) 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
 }
 
 .tutorial-step {
@@ -1253,16 +1099,6 @@ export default {
 
   .tutorial-content {
     padding: var(--space-lg);
-    width: 95%;
-  }
-
-  .tutorial-step {
-    flex-direction: column;
-  }
-
-  .step-number {
-    margin-bottom: var(--space-sm);
-    margin-right: 0;
   }
 }
 
