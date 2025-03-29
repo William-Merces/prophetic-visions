@@ -1,220 +1,147 @@
 <template>
   <div class="home">
-    <div class="stars-container">
-      <!-- Animação de estrelas via JavaScript no mounted() -->
+    <!-- Camada de fundo com estrelas -->
+    <div class="stars-background">
+      <!-- Estrelas geradas via JavaScript no mounted() -->
     </div>
 
-    <!-- Hero Section com visão imersiva -->
-    <div class="hero-section">
-      <h1 class="hero-title">
-        <span class="hero-title-line">Prophetic</span>
-        <span class="hero-title-line">Visions</span>
-      </h1>
-      <h2 class="hero-subtitle">Veja com os olhos dos profetas</h2>
+    <!-- Seção do herói com faixa roxa horizontal -->
+    <section class="hero-section">
+      <div class="dark-band"></div>
 
-      <div class="hero-description">
-        <p>Uma experiência imersiva que permite você visualizar as mesmas visões celestiais reveladas aos profetas através dos tempos.</p>
-        <p>Mergulhe nas escrituras como nunca antes, entendendo o significado profundo por trás de cada símbolo e a relevância para os dias atuais.</p>
-      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">PRONTO PARA VER COM OS OLHOS DOS PROFETAS?</h1>
+        <p class="hero-description">
+          Embarque nesta jornada visual pelas revelações divinas e descubra um novo nível
+          de compreensão profética.
+        </p>
 
-      <div class="hero-actions">
-        <router-link to="/apocalypse" class="btn btn-hero">
-          Iniciar Jornada Profética
-          <span class="btn-icon">→</span>
+        <router-link to="/apocalypse/1" class="btn-hero">
+          COMEÇAR AGORA →
         </router-link>
       </div>
-    </div>
+    </section>
 
-    <!-- Seção de recursos/características da experiência -->
-    <div class="features-section">
-      <h2>Sua jornada profética inclui</h2>
+    <!-- Seção de profetas com faixa roxa horizontal -->
+    <section class="prophets-section">
+      <div class="dark-band"></div>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">👁️</div>
-          <h3>Visualização Imersiva</h3>
-          <p>Imagens detalhadas que recriam as visões exatamente como os profetas as descreveram, permitindo que você veja o que eles viram.</p>
-        </div>
+      <div class="section-content">
+        <h2 class="section-title">Explore as Visões dos Profetas</h2>
 
-        <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <h3>Interpretação Profunda</h3>
-          <p>Explicações detalhadas de cada símbolo e seu significado teológico, tornando compreensível o que antes parecia misterioso.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">📜</div>
-          <h3>Contexto Histórico</h3>
-          <p>Conheça o cenário em que estas revelações foram recebidas, enriquecendo sua compreensão dos eventos proféticos.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
-          <h3>Conexões Escriturísticas</h3>
-          <p>Descubra como as visões de diferentes profetas se conectam através dos séculos, revelando o plano divino em toda sua amplitude.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Seção de livros proféticos disponíveis -->
-    <div class="books-section">
-      <h2>Livros Proféticos</h2>
-      <p class="section-description">Sua jornada começa com o Apocalipse, com mais livros proféticos sendo disponibilizados em breve.</p>
-
-      <div class="books-container">
-        <div
-          v-for="book in books"
-          :key="book.id"
-          class="book-card"
-          :class="{ 'unlocked': book.unlocked }"
-        >
-          <div class="book-cover">
-            <div class="book-spine"></div>
-            <div class="book-front">
-              <div class="book-icon">{{ book.icon }}</div>
-              <h3 class="book-title">{{ book.name }}</h3>
-              <div class="book-author">{{ book.author }}</div>
-
-              <div class="book-status">
-                <template v-if="book.unlocked">
-                  <span class="status-available">
-                    <span class="check-icon">✓</span> Disponível
-                  </span>
-                </template>
-                <template v-else>
-                  <span class="status-locked">
-                    <span class="lock-icon">🔒</span> Em breve
-                  </span>
-                </template>
+        <div class="prophets-grid">
+          <!-- Apocalipse - disponível -->
+          <router-link to="/apocalypse" class="prophet-card available">
+            <div class="card-content">
+              <div class="prophet-icon">📖</div>
+              <h3 class="prophet-name">Apocalipse</h3>
+              <p class="prophet-desc">As visões de João em Patmos</p>
+              <div class="availability-badge available">
+                <span class="badge-icon">✓</span>
+                <span class="badge-text">Disponível</span>
               </div>
             </div>
+            <div class="card-overlay">
+              <span class="explore-text">EXPLORAR</span>
+            </div>
+          </router-link>
+
+          <!-- Daniel - bloqueado -->
+          <div class="prophet-card locked">
+            <div class="card-content">
+              <div class="prophet-icon">🦁</div>
+              <h3 class="prophet-name">Daniel</h3>
+              <p class="prophet-desc">As visões na Babilônia</p>
+              <div class="availability-badge locked">
+                <span class="badge-icon">🔒</span>
+                <span class="badge-text">Em breve</span>
+              </div>
+            </div>
+            <div class="card-overlay locked">
+              <span class="overlay-text">EM BREVE</span>
+            </div>
           </div>
 
-          <div class="book-content">
-            <p class="book-description">{{ book.description }}</p>
-
-            <div class="book-action">
-              <router-link
-                v-if="book.unlocked"
-                :to="book.route"
-                class="btn btn-book"
-              >
-                Explorar Visões
-              </router-link>
-              <button
-                v-else
-                class="btn btn-book disabled"
-                disabled
-              >
-                Em desenvolvimento
-              </button>
+          <!-- Ezequiel - bloqueado -->
+          <div class="prophet-card locked">
+            <div class="card-content">
+              <div class="prophet-icon">🔥</div>
+              <h3 class="prophet-name">Ezequiel</h3>
+              <p class="prophet-desc">A visão do trono e do templo</p>
+              <div class="availability-badge locked">
+                <span class="badge-icon">🔒</span>
+                <span class="badge-text">Em breve</span>
+              </div>
+            </div>
+            <div class="card-overlay locked">
+              <span class="overlay-text">EM BREVE</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Seção de depoimentos/feedback -->
-    <div class="testimonials-section">
-      <h2>O que as pessoas estão dizendo</h2>
+    <!-- Seção sobre a experiência com faixa roxa horizontal -->
+    <section class="about-section">
+      <div class="dark-band"></div>
 
-      <div class="testimonials-container">
-        <div class="testimonial-card">
-          <div class="testimonial-quote">"Nunca entendi completamente o Apocalipse até experimentar esta jornada visual. Agora os símbolos fazem sentido!"</div>
-          <div class="testimonial-author">Mateus S.</div>
+      <div class="section-content">
+        <h2 class="section-title">Uma Experiência Imersiva</h2>
+        <p class="section-description">Conheça as visões proféticas como nunca antes, através de uma jornada interativa e imersiva que vai te levar ao cenário, contexto e conteúdo destas revelações divinas.</p>
+
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">🎬</div>
+            <h3 class="feature-title">Narrativa Visual</h3>
+            <p>Veja as visões se desenrolarem como se você estivesse lá, através de uma experiência imersiva.</p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">🔍</div>
+            <h3 class="feature-title">Contexto Histórico</h3>
+            <p>Entenda o cenário e as circunstâncias em que as visões ocorreram para uma compreensão mais profunda.</p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">📝</div>
+            <h3 class="feature-title">Interpretação</h3>
+            <p>Descubra o significado dos símbolos e imagens proféticas e sua relevância para os dias atuais.</p>
+          </div>
         </div>
 
-        <div class="testimonial-card">
-          <div class="testimonial-quote">"A forma como as conexões entre diferentes visões proféticas são mostradas me deu uma perspectiva totalmente nova sobre as escrituras."</div>
-          <div class="testimonial-author">Raquel L.</div>
-        </div>
-
-        <div class="testimonial-card">
-          <div class="testimonial-quote">"Ver as visões como João as viu me fez sentir como se eu estivesse realmente em Patmos. Uma experiência transformadora!"</div>
-          <div class="testimonial-author">Pedro A.</div>
+        <div class="about-actions">
+          <router-link to="/about" class="btn-secondary">
+            Saiba mais
+            <span class="btn-icon">→</span>
+          </router-link>
         </div>
       </div>
-    </div>
-
-    <!-- Call to action final -->
-    <div class="final-cta">
-      <h2>Pronto para ver com os olhos dos profetas?</h2>
-      <p>Embarque nesta jornada visual pelas revelações divinas e descubra um novo nível de compreensão profética.</p>
-      <router-link to="/apocalypse" class="btn btn-hero">
-        Começar Agora
-        <span class="btn-icon">→</span>
-      </router-link>
-    </div>
+    </section>
   </div>
 </template>
 
 <script>
 export default {
   name: 'HomeView',
-  data() {
-    return {
-      books: [
-        {
-          id: 'apocalypse',
-          name: 'Apocalipse',
-          author: 'João, o Revelador',
-          description: 'A revelação de Jesus Cristo a João em Patmos, com visões do trono celestial, os sete selos, e o destino final da humanidade.',
-          icon: '📖',
-          unlocked: true,
-          route: '/apocalypse'
-        },
-        {
-          id: 'daniel',
-          name: 'Daniel',
-          author: 'Daniel, o Profeta',
-          description: 'Visões de impérios mundiais, o Ancião de Dias, e profecias detalhadas sobre o fim dos tempos.',
-          icon: '🦁',
-          unlocked: false,
-          route: '/daniel'
-        },
-        {
-          id: 'ezekiel',
-          name: 'Ezequiel',
-          author: 'Ezequiel, o Sacerdote',
-          description: 'Visões da glória divina, criaturas celestiais, rodas místicas e o templo restaurado.',
-          icon: '🔥',
-          unlocked: false,
-          route: '/ezekiel'
-        },
-        {
-          id: 'isaiah',
-          name: 'Isaías',
-          author: 'Isaías, o Profeta',
-          description: 'Visão do trono divino, serafins clamando "Santo", e revelações sobre o Messias vindouro.',
-          icon: '👑',
-          unlocked: false,
-          route: '/isaiah'
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.createStars();
-  },
   methods: {
     createStars() {
-      const starsContainer = document.querySelector('.stars-container');
+      const starsContainer = document.querySelector('.stars-background');
       if (!starsContainer) return;
 
-      const starCount = 150;
+      const starCount = window.innerWidth <= 768 ? 100 : 200;
 
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
 
-        // Posicionar aleatoriamente
+        // Posição aleatória
         const x = Math.random() * 100;
         const y = Math.random() * 100;
 
         // Tamanho aleatório
-        const size = Math.random() * 2 + 1;
+        const size = Math.random() * (window.innerWidth <= 768 ? 1.5 : 2) + 1;
 
-        // Tempo de animação aleatório
+        // Duração da animação aleatória
         const duration = Math.random() * 3 + 2;
 
         star.style.left = `${x}%`;
@@ -226,6 +153,9 @@ export default {
         starsContainer.appendChild(star);
       }
     }
+  },
+  mounted() {
+    this.createStars();
   }
 }
 </script>
@@ -233,16 +163,21 @@ export default {
 <style scoped>
 .home {
   position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #000000;
 }
 
-.stars-container {
+/* Fundo com estrelas */
+.stars-background {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: -1;
+  z-index: -2;
   overflow: hidden;
+  background-color: #000000;
 }
 
 .star {
@@ -250,552 +185,421 @@ export default {
   background-color: white;
   border-radius: 50%;
   opacity: 0.8;
-  animation: twinkle var(--transition-slow) infinite alternate;
+  animation: twinkle 3s infinite alternate;
 }
 
+/* Faixas roxas horizontais para cada seção */
+.dark-band {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 10, 40, 0) 0%,
+    rgba(20, 10, 40, 0.7) 30%,
+    rgba(20, 10, 40, 0.8) 50%,
+    rgba(20, 10, 40, 0.7) 70%,
+    rgba(20, 10, 40, 0) 100%
+  );
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Estilos de seção comuns */
+section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 1rem;
+}
+
+.section-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #c4b454;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 15px rgba(196, 180, 84, 0.5);
+  font-family: var(--font-family-heading);
+}
+
+.section-description {
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #ffffff;
+}
+
+/* Seção do herói */
+.hero-section {
+  min-height: 100vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  padding: 2rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  color: #c4b454;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 20px rgba(196, 180, 84, 0.7);
+  font-family: var(--font-family-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.hero-description {
+  font-size: 1.3rem;
+  color: #ffffff;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.btn-hero {
+  background-color: #c4b454;
+  color: #000000;
+  padding: 1rem 2.5rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: var(--font-family-heading);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 20px rgba(196, 180, 84, 0.3);
+  display: inline-block;
+}
+
+.btn-hero:hover {
+  background-color: #d9cf82;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(196, 180, 84, 0.4);
+}
+
+/* Seção de profetas */
+.prophets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.prophet-card {
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.8), rgba(10, 10, 10, 0.8));
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: default;
+  text-decoration: none;
+}
+
+.prophet-card.available {
+  background: linear-gradient(145deg, rgba(30, 20, 0, 0.8), rgba(20, 10, 0, 0.9));
+  border-color: #c4b454;
+  box-shadow: 0 0 20px rgba(196, 180, 84, 0.2);
+  cursor: pointer;
+}
+
+.prophet-card.locked:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.prophet-card.available:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(196, 180, 84, 0.3);
+}
+
+.card-content {
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prophet-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.prophet-card.available .prophet-icon {
+  background-color: rgba(196, 180, 84, 0.2);
+  border-color: #c4b454;
+  box-shadow: 0 0 15px rgba(196, 180, 84, 0.3);
+}
+
+.prophet-card:hover .prophet-icon {
+  transform: scale(1.1);
+}
+
+.prophet-name {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+  font-family: var(--font-family-heading);
+}
+
+.prophet-card.available .prophet-name {
+  color: #c4b454;
+}
+
+.prophet-desc {
+  color: #cccccc;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.availability-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.availability-badge.available {
+  background-color: rgba(196, 180, 84, 0.2);
+  color: #c4b454;
+  border: 1px solid rgba(196, 180, 84, 0.3);
+}
+
+.availability-badge.locked {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #cccccc;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+/* Overlay que aparece no hover */
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 20, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.card-overlay.locked {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.prophet-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.explore-text {
+  color: #c4b454;
+  font-size: 1.2rem;
+  font-family: var(--font-family-heading);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.7rem 2.5rem;
+  border: 2px solid #c4b454;
+  border-radius: 4px;
+}
+
+.overlay-text {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-family: var(--font-family-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.5rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Seção de recursos */
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.feature {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(196, 180, 84, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  border-color: #c4b454;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  font-size: 1.3rem;
+  color: #c4b454;
+  margin-bottom: 1rem;
+  font-family: var(--font-family-heading);
+}
+
+.about-actions {
+  margin-top: 3rem;
+}
+
+.btn-secondary {
+  padding: 0.8rem 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #c4b454;
+  color: #000000;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  text-decoration: none;
+  font-family: var(--font-family-heading);
+}
+
+.btn-secondary:hover {
+  background-color: #d9cf82;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-icon {
+  transition: transform 0.15s ease;
+}
+
+.btn-secondary:hover .btn-icon {
+  transform: translateX(3px);
+}
+
+/* Animações */
 @keyframes twinkle {
   0% { opacity: 0.2; }
   100% { opacity: 0.8; }
 }
 
-/* Hero Section */
-.hero-section {
-  height: 90vh;
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: var(--space-xl);
-  background: radial-gradient(circle at center, rgba(75, 46, 131, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
-}
-
-.hero-title {
-  font-size: 4rem;
-  margin-bottom: var(--space-md);
-  text-shadow: 0 0 20px rgba(196, 180, 84, 0.7);
-  letter-spacing: 0.1em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero-title-line {
-  font-size: 6rem;
-  font-weight: 700;
-  line-height: 1.1;
-  background: linear-gradient(to right, var(--color-secondary) 0%, #ffffff 50%, var(--color-secondary) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: block;
-  text-shadow: 0 0 20px rgba(196, 180, 84, 0.7);
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes glow {
-  from { text-shadow: 0 0 10px rgba(196, 180, 84, 0.7); }
-  to { text-shadow: 0 0 20px rgba(196, 180, 84, 0.9), 0 0 30px rgba(196, 180, 84, 0.5); }
-}
-
-.hero-subtitle {
-  font-size: 1.8rem;
-  color: var(--color-secondary-light);
-  margin-bottom: var(--space-lg);
-  font-family: var(--font-family-quote);
-  font-weight: 400;
-  font-style: italic;
-}
-
-.hero-description {
-  max-width: 800px;
-  margin-bottom: var(--space-xl);
-}
-
-.hero-description p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  margin-bottom: var(--space-md);
-  color: var(--color-text);
-}
-
-.hero-actions {
-  margin-top: var(--space-lg);
-}
-
-.btn-hero {
-  font-size: 1.2rem;
-  padding: var(--space-md) var(--space-xl);
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-normal);
-  box-shadow: 0 0 20px rgba(196, 180, 84, 0.3);
-}
-
-.btn-hero:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 30px rgba(196, 180, 84, 0.5);
-  background-color: var(--color-secondary-light);
-}
-
-.btn-icon {
-  transition: transform var(--transition-fast);
-}
-
-.btn-hero:hover .btn-icon {
-  transform: translateX(5px);
-}
-
-/* Features Section */
-.features-section {
-  padding: var(--space-xxl) var(--space-xl);
-  background-color: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: center;
-}
-
-.features-section h2 {
-  font-size: 2.5rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-xl);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-xl);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.feature-card {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-md);
-  padding: var(--space-xl);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all var(--transition-normal);
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  background-color: rgba(75, 46, 131, 0.2);
-  border-color: rgba(196, 180, 84, 0.3);
-  box-shadow: 0 0 20px rgba(196, 180, 84, 0.1);
-}
-
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: var(--space-md);
-  color: var(--color-secondary);
-}
-
-.feature-card h3 {
-  font-size: 1.3rem;
-  color: var(--color-secondary-light);
-  margin-bottom: var(--space-md);
-}
-
-.feature-card p {
-  line-height: 1.7;
-  color: var(--color-text);
-}
-
-/* Books Section */
-.books-section {
-  padding: var(--space-xxl) var(--space-xl);
-  text-align: center;
-}
-
-.books-section h2 {
-  font-size: 2.5rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-}
-
-.section-description {
-  max-width: 800px;
-  margin: 0 auto var(--space-xl);
-  font-size: 1.1rem;
-  color: var(--color-text-muted);
-}
-
-.books-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-xl);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.book-card {
-  background: linear-gradient(145deg, rgba(30, 30, 30, 0.7), rgba(20, 20, 20, 0.9));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: all var(--transition-normal);
-  height: 100%;
-  box-shadow: var(--shadow-md);
-  position: relative;
-  opacity: 0.7;
-  display: flex;
-  flex-direction: column;
-}
-
-.book-card.unlocked {
-  opacity: 1;
-  background: linear-gradient(145deg, rgba(75, 46, 131, 0.3), rgba(20, 20, 20, 0.9));
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-}
-
-.book-card:hover {
-  transform: translateY(-10px) rotate(1deg);
-}
-
-.book-card.unlocked:hover {
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(196, 180, 84, 0.3);
-}
-
-.book-cover {
-  position: relative;
-  display: flex;
-  height: 200px;
-  perspective: 1000px;
-  margin-bottom: var(--space-md);
-}
-
-.book-spine {
-  width: 40px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(50, 50, 50, 0.8), rgba(30, 30, 30, 0.8));
-  transform-origin: left;
-  transform: rotateY(25deg);
-  border-radius: 2px 0 0 2px;
-}
-
-.book-card.unlocked .book-spine {
-  background: linear-gradient(to right, var(--color-secondary-dark), var(--color-primary-dark));
-  box-shadow: 0 0 10px rgba(196, 180, 84, 0.2);
-}
-
-.book-front {
-  position: absolute;
-  left: 20px;
-  top: 0;
-  width: calc(100% - 40px);
-  height: 100%;
-  background: linear-gradient(45deg, rgba(40, 40, 40, 0.9), rgba(60, 60, 60, 0.9));
-  padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  border-radius: 0 5px 5px 0;
-  transform-origin: left;
-  transform: rotateY(15deg);
-  transition: all var(--transition-normal);
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.book-card.unlocked .book-front {
-  background: linear-gradient(45deg, rgba(75, 46, 131, 0.7), rgba(40, 40, 40, 0.9));
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(196, 180, 84, 0.2);
-}
-
-.book-card:hover .book-front {
-  transform: rotateY(0);
-}
-
-.book-icon {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-sm);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.book-title {
-  font-size: 1.3rem;
-  margin-bottom: var(--space-xs);
-  color: var(--color-text);
-}
-
-.book-card.unlocked .book-title {
-  color: var(--color-secondary);
-}
-
-.book-author {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  font-style: italic;
-  margin-bottom: var(--space-sm);
-}
-
-.book-status {
-  margin-top: auto;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-}
-
-.status-available {
-  color: var(--color-secondary);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.check-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  border-radius: 50%;
-  font-size: 0.7rem;
-}
-
-.status-locked {
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.lock-icon {
-  color: var(--color-text-muted);
-}
-
-.book-content {
-  padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.book-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: var(--space-md);
-  color: var(--color-text-muted);
-  flex: 1;
-}
-
-.book-card.unlocked .book-description {
-  color: var(--color-text);
-}
-
-.book-action {
-  margin-top: auto;
-}
-
-.btn-book {
-  width: 100%;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-  font-size: 0.9rem;
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  transition: all var(--transition-normal);
-}
-
-.btn-book:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(196, 180, 84, 0.3);
-}
-
-.btn-book.disabled {
-  background-color: rgba(100, 100, 100, 0.3);
-  cursor: not-allowed;
-  color: var(--color-text-muted);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Testimonials Section */
-.testimonials-section {
-  padding: var(--space-xxl) var(--space-xl);
-  background-color: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: center;
-}
-
-.testimonials-section h2 {
-  font-size: 2.5rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-xl);
-}
-
-.testimonials-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-xl);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.testimonial-card {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-md);
-  padding: var(--space-xl);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative;
-  transition: all var(--transition-normal);
-}
-
-.testimonial-card:hover {
-  transform: translateY(-5px);
-  background-color: rgba(75, 46, 131, 0.2);
-  border-color: rgba(196, 180, 84, 0.3);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-}
-
-.testimonial-card::before {
-  content: '"';
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  font-size: 3rem;
-  color: var(--color-secondary);
-  opacity: 0.3;
-  line-height: 1;
-  font-family: var(--font-family-quote);
-}
-
-.testimonial-quote {
-  font-family: var(--font-family-quote);
-  font-style: italic;
-  font-size: 1.1rem;
-  line-height: 1.7;
-  margin-bottom: var(--space-lg);
-}
-
-.testimonial-author {
-  font-weight: 600;
-  color: var(--color-secondary);
-  position: relative;
-  display: inline-block;
-  padding-top: var(--space-xs);
-}
-
-.testimonial-author::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30px;
-  height: 2px;
-  background-color: var(--color-secondary);
-  opacity: 0.5;
-}
-
-/* Final CTA Section */
-.final-cta {
-  padding: var(--space-xxl) var(--space-xl);
-  text-align: center;
-  background: radial-gradient(circle at center, rgba(75, 46, 131, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
-}
-
-.final-cta h2 {
-  font-size: 2.5rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-}
-
-.final-cta p {
-  max-width: 700px;
-  margin: 0 auto var(--space-xl);
-  font-size: 1.2rem;
-  line-height: 1.6;
-}
-
-/* Responsiveness */
-@media (max-width: 1024px) {
-  .hero-title-line {
-    font-size: 5rem;
+/* Responsividade */
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 3rem;
   }
 
-  .hero-subtitle {
-    font-size: 1.5rem;
-  }
-
-  .features-section h2,
-  .books-section h2,
-  .testimonials-section h2,
-  .final-cta h2 {
+  .section-title {
     font-size: 2rem;
+  }
+
+  .dark-band {
+    height: 250px;
   }
 }
 
 @media (max-width: 768px) {
-  .hero-section {
-    height: auto;
-    min-height: auto;
-    padding: var(--space-xl) var(--space-md);
+  .hero-title {
+    font-size: 2.5rem;
   }
 
-  .hero-title-line {
-    font-size: 3.5rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.2rem;
-  }
-
-  .hero-description p {
-    font-size: 1rem;
-  }
-
-  .btn-hero {
-    width: 100%;
-    justify-content: center;
+  .hero-description {
     font-size: 1.1rem;
   }
 
-  .features-section,
-  .books-section,
-  .testimonials-section,
-  .final-cta {
-    padding: var(--space-xl) var(--space-md);
+  .section-title {
+    font-size: 1.8rem;
   }
 
-  .book-card {
-    max-width: 350px;
-    margin: 0 auto;
+  .section-description {
+    font-size: 1rem;
+  }
+
+  .prophets-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .features {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature {
+    width: 100%;
+  }
+
+  .dark-band {
+    height: 200px;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title-line {
-    font-size: 2.8rem;
+  .hero-title {
+    font-size: 2rem;
   }
 
-  .hero-subtitle {
+  .btn-hero {
     font-size: 1rem;
+    padding: 0.8rem 1.8rem;
   }
 
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .testimonial-quote {
-    font-size: 1rem;
+  .section-title {
+    font-size: 1.5rem;
   }
 }
 </style>

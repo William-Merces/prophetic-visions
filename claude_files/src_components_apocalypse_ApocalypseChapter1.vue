@@ -1,1133 +1,1637 @@
 <template>
-  <div class="apocalypse-chapter1">
-    <div class="stars-container">
-      <!-- Animação de estrelas via JavaScript no mounted() -->
-    </div>
+  <div class="apocalypse-chapter" ref="chapterContainer">
+    <!-- Fundo imersivo com estrelas e efeitos visuais -->
+    <ImmersiveBackground theme="revelation" :intensity="1.5" :hasParticles="true">
+      <!-- Cabeçalho do capítulo -->
+      <div class="chapter-header">
+        <h1 class="chapter-title">Apocalipse 1</h1>
+        <h2 class="chapter-subtitle">A Visão do Filho do Homem</h2>
+      </div>
 
-    <!-- Tutorial overlay quando necessário -->
-    <div v-if="showTutorial" class="tutorial-overlay" @click="dismissTutorial">
-      <div class="tutorial-content" @click.stop>
-        <h3>Bem-vindo à experiência imersiva do Apocalipse</h3>
-        <p>Prepare-se para mergulhar na visão de João e explorar os mistérios revelados.</p>
-
-        <div class="tutorial-steps">
-          <div class="tutorial-step">
-            <div class="step-number">1</div>
-            <div class="step-info">
-              <h4>Introdução</h4>
-              <p>Nos Passos de João: Conheça o contexto histórico e pessoal de João quando recebeu a revelação em Patmos.</p>
-            </div>
+      <!-- Navegação do progresso -->
+      <div class="progress-navigation">
+        <div
+          v-for="stage in stages"
+          :key="stage.id"
+          class="progress-stage"
+          :class="{
+            'active': currentStage >= stage.id,
+            'current': currentStage === stage.id
+          }"
+          @click="navigateToStage(stage.id)"
+        >
+          <div class="stage-number">{{ stage.id }}</div>
+          <div class="stage-info">
+            <div class="stage-name">{{ stage.name }}</div>
+            <div class="stage-description">{{ stage.description }}</div>
           </div>
+        </div>
+      </div>
 
-          <div class="tutorial-step">
-            <div class="step-number">2</div>
-            <div class="step-info">
-              <h4>Narração</h4>
-              <p>Através dos Olhos de João: Experimente a visão do Filho do Homem como se você fosse João em Patmos.</p>
+      <!-- Conteúdo da etapa atual -->
+      <div class="stage-content">
+        <!-- Etapa 1: O Cenário -->
+        <div v-if="currentStage === 1" class="stage-container context-stage">
+          <div class="stage-section">
+            <h3 class="section-title">O Cenário Histórico</h3>
+
+            <div class="context-slider">
+              <div class="slider-controls">
+                <button
+                  class="control-btn prev-btn"
+                  @click="prevContextSlide"
+                  :disabled="currentContextSlide === 0"
+                >
+                  <span class="control-icon">←</span>
+                </button>
+
+                <div class="slide-indicators">
+                  <div
+                    v-for="(_, index) in contextSlides"
+                    :key="index"
+                    class="slide-indicator"
+                    :class="{ 'active': currentContextSlide === index }"
+                    @click="goToContextSlide(index)"
+                  ></div>
+                </div>
+
+                <button
+                  class="control-btn next-btn"
+                  @click="nextContextSlide"
+                  :disabled="currentContextSlide === contextSlides.length - 1"
+                >
+                  <span class="control-icon">→</span>
+                </button>
+              </div>
+
+              <transition name="slide" mode="out-in">
+                <div
+                  :key="currentContextSlide"
+                  class="context-slide"
+                  :style="{ backgroundImage: `url(${contextSlides[currentContextSlide].image})` }"
+                >
+                  <div class="slide-overlay" :class="contextSlides[currentContextSlide].overlayClass"></div>
+                  <div class="slide-content">
+                    <h3 class="slide-title">{{ contextSlides[currentContextSlide].title }}</h3>
+                    <div class="slide-text">
+                      <p v-for="(paragraph, idx) in contextSlides[currentContextSlide].text" :key="idx">
+                        {{ paragraph }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </div>
-          </div>
 
-          <div class="tutorial-step">
-            <div class="step-number">3</div>
-            <div class="step-info">
-              <h4>Interação</h4>
-              <p>Desvendando os Símbolos: Descubra o significado dos símbolos e imagens da visão do Filho do Homem.</p>
-            </div>
-          </div>
-
-          <div class="tutorial-step">
-            <div class="step-number">4</div>
-            <div class="step-info">
-              <h4>Reflexão</h4>
-              <p>Ecos Através do Tempo: Veja como a visão de João se conecta com outras revelações através da história.</p>
+            <div class="stage-actions">
+              <button class="action-btn next-stage-btn" @click="completeCurrentStage">
+                Próximo: A Revelação <span class="btn-icon">→</span>
+              </button>
             </div>
           </div>
         </div>
 
-        <button class="btn btn-secondary tutorial-dismiss" @click="dismissTutorial">
-          Iniciar Jornada
-        </button>
-      </div>
-    </div>
+        <!-- Etapa 2: A Revelação -->
+        <div v-if="currentStage === 2" class="stage-container revelation-stage">
+          <div class="stage-section">
+            <h3 class="section-title">A Revelação Divina</h3>
 
-    <!-- Cabeçalho do capítulo (agora clicável para iniciar experiência) -->
-    <div v-if="!activeBlock && !showIntroduction" class="chapter-header" @click="showIntroScreen" role="button" tabindex="0">
-      <h2 class="chapter-title">A Visão do Filho do Homem</h2>
-      <p class="chapter-description">
-        Explore a primeira visão do Apocalipse, onde João vê Cristo glorificado
-        caminhando entre sete candeeiros de ouro.
-      </p>
-      <div class="chapter-action-hint">
-        <span class="tap-icon">👆</span> Toque para iniciar a experiência
-      </div>
-    </div>
+            <div class="revelation-experience">
+              <div class="experience-controls">
+                <button
+                  class="control-btn prev-btn"
+                  @click="prevRevelationSlide"
+                  :disabled="currentRevelationSlide === 0"
+                >
+                  <span class="control-icon">←</span>
+                </button>
 
-    <!-- Navegação entre blocos (quando não estiver em um bloco específico) -->
-    <div v-if="!activeBlock && !showIntroduction" class="blocks-navigation">
-      <p class="blocks-instruction">Escolha uma parte da experiência:</p>
-      <div class="blocks-grid">
-        <div
-          v-for="block in blocks"
-          :key="block.id"
-          class="block-card"
-          :class="{
-            'completed': completedBlocks.includes(block.id),
-            'pulse-attention': needsAttention && !completedBlocks.includes(block.id),
-            'highlight-recent': lastCompletedBlock === block.id
-          }"
-          @click="selectBlock(block.id)"
-        >
-          <div class="block-content">
-            <div class="block-icon">{{ block.icon }}</div>
-            <h3 class="block-title">{{ block.title }}</h3>
-            <p class="block-description">{{ block.description }}</p>
-            <div class="block-status">
-              <span v-if="completedBlocks.includes(block.id)" class="status-completed">
-                <span class="check-icon">✓</span> Concluído
-              </span>
-              <span v-else class="status-available">
-                <span class="tap-icon">👆</span> Toque para iniciar
-              </span>
+                <div class="slide-indicators">
+                  <div
+                    v-for="(_, index) in revelationSlides"
+                    :key="index"
+                    class="slide-indicator"
+                    :class="{ 'active': currentRevelationSlide === index }"
+                    @click="goToRevelationSlide(index)"
+                  ></div>
+                </div>
+
+                <button
+                  class="control-btn next-btn"
+                  @click="nextRevelationSlide"
+                  :disabled="currentRevelationSlide === revelationSlides.length - 1"
+                >
+                  <span class="control-icon">→</span>
+                </button>
+              </div>
+
+              <transition name="fade" mode="out-in">
+                <div
+                  :key="currentRevelationSlide"
+                  class="revelation-scene"
+                  :style="{ backgroundImage: `url(${revelationSlides[currentRevelationSlide].image})` }"
+                >
+                  <div class="scene-overlay" :class="revelationSlides[currentRevelationSlide].overlayClass"></div>
+
+                  <!-- Efeitos especiais com base na cena atual -->
+                  <div v-if="revelationSlides[currentRevelationSlide].effects" class="scene-effects">
+                    <div
+                      v-for="(effect, idx) in revelationSlides[currentRevelationSlide].effects"
+                      :key="idx"
+                      :class="effect"
+                    ></div>
+                  </div>
+
+                  <div class="scene-content">
+                    <h3 class="scene-title">{{ revelationSlides[currentRevelationSlide].title }}</h3>
+                    <div class="scene-narrative">
+                      <p v-for="(paragraph, idx) in revelationSlides[currentRevelationSlide].narrative" :key="idx">
+                        {{ paragraph }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </div>
-            <div class="block-action-hint">
-              <button
-                class="start-btn"
-                :class="{'completed-btn': completedBlocks.includes(block.id)}"
+
+            <div class="stage-actions">
+              <button class="action-btn prev-stage-btn" @click="previousStage">
+                <span class="btn-icon">←</span> Voltar: O Cenário
+              </button>
+              <button class="action-btn next-stage-btn" @click="completeCurrentStage">
+                Próximo: O Significado <span class="btn-icon">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapa 3: O Significado -->
+        <div v-if="currentStage === 3" class="stage-container meaning-stage">
+          <div class="stage-section">
+            <h3 class="section-title">O Significado dos Símbolos</h3>
+
+            <div class="symbols-introduction">
+              <p>A visão de João do Filho do Homem está repleta de simbolismo poderoso. Cada elemento transmite um significado teológico profundo sobre a natureza e o caráter de Cristo glorificado.</p>
+            </div>
+
+            <div class="symbols-grid">
+              <div
+                v-for="(symbol, index) in symbols"
+                :key="index"
+                class="symbol-card"
+                :class="{ 'expanded': expandedSymbol === index }"
+                @click="toggleSymbol(index)"
               >
-                {{ completedBlocks.includes(block.id) ? 'Revisitar' : 'Iniciar Experiência' }}
+                <div class="symbol-header">
+                  <div class="symbol-icon">{{ symbol.icon }}</div>
+                  <h4 class="symbol-name">{{ symbol.name }}</h4>
+                  <div class="expand-icon">{{ expandedSymbol === index ? '−' : '+' }}</div>
+                </div>
+
+                <transition name="expand">
+                  <div v-if="expandedSymbol === index" class="symbol-details">
+                    <p class="symbol-description">{{ symbol.description }}</p>
+
+                    <div class="scripture-reference">
+                      <p class="scripture-text">"{{ symbol.scripture }}"</p>
+                      <span class="scripture-ref">{{ symbol.reference }}</span>
+                    </div>
+
+                    <div class="symbol-meaning">
+                      <h5>Significado:</h5>
+                      <p>{{ symbol.meaning }}</p>
+                    </div>
+                  </div>
+                </transition>
+              </div>
+            </div>
+
+            <div class="final-reflection">
+              <h4>Reflexão</h4>
+              <p>Esta visão inicial estabelece o tom para todo o livro do Apocalipse. João vê Cristo em toda Sua glória divina, não mais como o servo humilde, mas como o Rei eterno e vitorioso. Os símbolos revelam Sua autoridade, sabedoria, pureza, poder e domínio sobre a morte.</p>
+              <p>A mensagem é clara para as igrejas que sofrem perseguição: Cristo está presente entre elas, conhece suas lutas, e já conquistou a vitória final sobre todos os inimigos.</p>
+            </div>
+
+            <div class="stage-actions">
+              <button class="action-btn prev-stage-btn" @click="previousStage">
+                <span class="btn-icon">←</span> Voltar: A Revelação
+              </button>
+              <button class="action-btn complete-btn" @click="completeChapter">
+                Concluir Capítulo <span class="btn-icon">✓</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Conteúdo do bloco ativo -->
-    <div v-if="activeBlock" class="active-block-container">
-      <!-- Bloco 1: Contexto Histórico - "Nos Passos de João" -->
-      <ApocalypseChapter1Block1
-        v-if="activeBlock === 1"
-        @complete="completeBlock(1, $event)"
-        @exit-fullscreen="returnToBlocks"
-      />
 
-      <!-- Bloco 2: A Experiência da Visão - "Através dos Olhos de João" -->
-      <ApocalypseChapter1Block2
-        v-if="activeBlock === 2"
-        @complete="completeBlock(2, $event)"
-        @exit-fullscreen="returnToBlocks"
-      />
-
-      <!-- Bloco 3: Desvendando os Símbolos -->
-      <ApocalypseChapter1Block3
-        v-if="activeBlock === 3"
-        @complete="completeBlock(3, $event)"
-        @exit-fullscreen="returnToBlocks"
-      />
-
-      <!-- Bloco 4: Ecos Através do Tempo -->
-      <ApocalypseChapter1Block4
-        v-if="activeBlock === 4"
-        @complete="completeBlock(4, $event)"
-        @exit-fullscreen="returnToBlocks"
-      />
-
-      <!-- Botão para voltar à seleção de blocos (fixo no topo) -->
-      <div class="block-navigation fixed">
-        <button class="nav-btn back-btn" @click="returnToBlocks">
-          <span class="nav-icon">←</span> Voltar para seleção
+      <!-- Botões fixos de navegação -->
+      <div class="fixed-navigation">
+        <button class="nav-btn back-btn" @click="exitExperience" title="Voltar à seleção de capítulos">
+          <span class="nav-icon">←</span>
+        </button>
+        <button class="nav-btn fullscreen-btn" @click="toggleFullscreen" title="Alternar tela cheia">
+          <span class="nav-icon">{{ isFullscreen ? '⟲' : '⟱' }}</span>
         </button>
       </div>
-    </div>
+    </ImmersiveBackground>
 
-    <!-- Botão para completar capítulo (ativo quando todos os blocos foram completados) -->
-    <div class="chapter-completion" v-if="allBlocksCompleted && !activeBlock && !showIntroduction">
-      <p class="completion-message">Parabéns! Você concluiu todos os blocos deste capítulo.</p>
-      <button class="btn btn-complete" @click="completeChapter">
-        Marcar Capítulo como Concluído
-      </button>
-    </div>
-
-    <!-- Rodapé com informações do capítulo -->
-    <div class="chapter-footer" v-if="!activeBlock && !showIntroduction">
-      <div class="scripture-reference">
-        <blockquote>
-          "Eu fui arrebatado em espírito no dia do Senhor, e ouvi detrás de mim uma grande voz, como de trombeta, que dizia: Eu sou o Alfa e o Ômega, o primeiro e o derradeiro..."
-          <cite>Apocalipse 1:10-11</cite>
-        </blockquote>
+    <!-- Modal de conclusão -->
+    <transition name="modal">
+      <div v-if="showCompletionModal" class="completion-modal">
+        <div class="modal-backdrop" @click="closeCompletionModal"></div>
+        <div class="modal-content">
+          <h3 class="modal-title">Capítulo Concluído!</h3>
+          <div class="modal-message">
+            <p>Você completou com sucesso sua jornada através do primeiro capítulo do Apocalipse.</p>
+            <p>Você experimentou a visão impressionante que João teve do Filho do Homem glorificado e explorou o significado dos símbolos proféticos.</p>
+          </div>
+          <div class="modal-actions">
+            <button class="action-btn" @click="returnToChapterSelection">
+              Voltar à Seleção de Capítulos
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script>
-import ApocalypseChapter1Block1 from './ApocalypseChapter1Block1.vue'
-import ApocalypseChapter1Block2 from './ApocalypseChapter1Block2.vue'
-import ApocalypseChapter1Block3 from './ApocalypseChapter1Block3.vue'
-import ApocalypseChapter1Block4 from './ApocalypseChapter1Block4.vue'
+import ImmersiveBackground from '@/components/common/ImmersiveBackground.vue';
 
 export default {
   name: 'ApocalypseChapter1',
   components: {
-    ApocalypseChapter1Block1,
-    ApocalypseChapter1Block2,
-    ApocalypseChapter1Block3,
-    ApocalypseChapter1Block4
+    ImmersiveBackground
   },
   data() {
     return {
-      activeBlock: null,
-      completedBlocks: [],
-      showTutorial: false,
-      showIntroduction: false,
-      needsAttention: false,
-      tutorialTimeout: null,
-      attentionInterval: null,
-      lastCompletedBlock: null,
-      blocks: [
+      // Estado atual da experiência
+      currentStage: 1,
+      isFullscreen: false,
+      showCompletionModal: false,
+
+      // Etapas disponíveis
+      stages: [
         {
           id: 1,
-          title: "Nos Passos de João",
-          description: "Conheça o contexto histórico e pessoal de João quando recebeu a revelação em Patmos.",
-          icon: "📜"
+          name: 'O Cenário',
+          description: 'Contexto histórico da revelação'
         },
         {
           id: 2,
-          title: "Através dos Olhos de João",
-          description: "Experimente a visão do Filho do Homem como se você fosse João em Patmos.",
-          icon: "👁️"
+          name: 'A Revelação',
+          description: 'A visão do Filho do Homem'
         },
         {
           id: 3,
-          title: "Desvendando os Símbolos",
-          description: "Descubra o significado dos símbolos e imagens da visão do Filho do Homem.",
-          icon: "🔍"
+          name: 'O Significado',
+          description: 'Interpretação dos símbolos'
+        }
+      ],
+
+      // Controle dos slides
+      currentContextSlide: 0,
+      currentRevelationSlide: 0,
+      expandedSymbol: null,
+
+      // Conteúdo da etapa 1: Contexto
+      contextSlides: [
+        {
+          title: "Roma, 95 d.C.",
+          image: "/images/apocalypse/rome-empire-map.jpg",
+          overlayClass: "dark",
+          text: [
+            "O Império Romano controla todo o mundo conhecido, de Gibraltar até a Mesopotâmia, do Norte da África até a Britânia.",
+            "O imperador Domiciano exige ser adorado como 'Senhor e Deus', estabelecendo o culto imperial em todas as províncias.",
+            "Aqueles que se recusam a oferecer incenso ao imperador são considerados inimigos do estado."
+          ]
         },
         {
-          id: 4,
-          title: "Ecos Através do Tempo",
-          description: "Veja como a visão de João se conecta com outras revelações através da história.",
-          icon: "⏳"
+          title: "Tempos de Perseguição",
+          image: "/images/apocalypse/roman-persecution.jpg",
+          overlayClass: "dramatic",
+          text: [
+            "Para os seguidores de Cristo, recusar-se a adorar o imperador significa enfrentar perseguição: confisco de bens, proibição de comércio, prisão, exílio ou morte.",
+            "Muitos cristãos escolhem a morte em vez de negar sua fé, tornando-se mártires — testemunhas que selam seu testemunho com sangue.",
+            "As comunidades cristãs se reúnem em segredo, usando símbolos como o peixe (ICHTHYS) para identificar uns aos outros."
+          ]
+        },
+        {
+          title: "João, O Último Apóstolo",
+          image: "/images/apocalypse/apostle-john.jpg",
+          overlayClass: "light",
+          text: [
+            "Entre os perseguidos está João, o último apóstolo vivo, agora com cerca de 90 anos de idade.",
+            "Ele carrega as memórias de ter caminhado com Jesus, de ter repousado em Seu peito durante a Última Ceia, de ter permanecido aos pés da cruz.",
+            "Após décadas servindo como pastor e líder espiritual, João vê as igrejas que fundou enfrentando sua maior prova."
+          ]
+        },
+        {
+          title: "Exílio em Patmos",
+          image: "/images/apocalypse/patmos-island.jpg",
+          overlayClass: "dark",
+          text: [
+            "Por seu testemunho inabalável, João foi exilado para Patmos — uma ilha rochosa e árida no Mar Egeu, usada como colônia penal romana.",
+            "Separado das congregações que pastoreava, mas não de seu Senhor, João continua em comunhão com Deus através da oração.",
+            "A ilha torna-se não apenas seu lugar de exílio, mas o ponto de encontro entre o céu e a terra."
+          ]
+        },
+        {
+          title: "Igrejas em Crise",
+          image: "/images/apocalypse/asian-churches.jpg",
+          overlayClass: "dramatic",
+          text: [
+            "As sete igrejas da Ásia que João pastoreava estão em crise: perseguição externa, falsos ensinamentos internos, alguns abandonando a fé.",
+            "Éfeso perdeu seu primeiro amor. Pérgamo compromete-se com doutrinas falsas. Tiatira tolera a imoralidade. Sardes está espiritualmente morta.",
+            "Eles precisam desesperadamente de esperança e direção para perseverar nos tempos sombrios."
+          ]
+        },
+        {
+          title: "O Dia do Senhor",
+          image: "/images/apocalypse/john-praying-patmos.jpg",
+          overlayClass: "light",
+          text: [
+            "É domingo, o Dia do Senhor, em Patmos. João está em oração, sozinho nas rochosas encostas da ilha.",
+            "No silêncio da adoração, seu espírito se eleva além do exílio terreno, além das limitações da carne e do tempo.",
+            "Ele não sabe que está prestes a receber a maior revelação da história — um vislumbre do plano divino que se desdobrará até o fim dos tempos."
+          ]
+        }
+      ],
+
+      // Conteúdo da etapa 2: Revelação
+      revelationSlides: [
+        {
+          title: "Arrebatado em Espírito",
+          image: "/images/apocalypse/spirit-veil.jpg",
+          overlayClass: "light",
+          effects: ["celestial-rays"],
+          narrative: [
+            "Uma sensação sobrenatural percorre seu corpo. Não é mais a brisa marítima que toca sua pele, mas algo diferente... algo transcendente.",
+            "Você já não está mais em Patmos. Pelo menos não fisicamente. É como se existisse simultaneamente em dois reinos, com seus sentidos espirituais despertados."
+          ]
+        },
+        {
+          title: "A Voz como de Trombeta",
+          image: "/images/apocalypse/heavenly-voice.jpg",
+          overlayClass: "dramatic",
+          effects: ["celestial-rays", "holy-light"],
+          narrative: [
+            "De repente, uma voz ressoa atrás de você - não como uma voz humana, mas poderosa como uma trombeta celestial.",
+            "Ela reverbera não apenas em seus ouvidos, mas em todo o seu ser: 'EU SOU O ALFA E O ÔMEGA, O PRIMEIRO E O ÚLTIMO!'"
+          ]
+        },
+        {
+          title: "Os Sete Candeeiros",
+          image: "/images/apocalypse/seven-lampstands.jpg",
+          overlayClass: "dark",
+          effects: ["holy-light"],
+          narrative: [
+            "Ao se virar para ver quem fala, a realidade ao seu redor se transforma...",
+            "Diante de seus olhos, sete candeeiros de ouro surgem, brilhando com uma luz sobrenatural que não provém de chama alguma."
+          ]
+        },
+        {
+          title: "O Filho do Homem",
+          image: "/images/apocalypse/son-of-man.jpg",
+          overlayClass: "dramatic",
+          effects: ["divine-presence", "holy-light"],
+          narrative: [
+            "Entre os candeeiros, surge uma figura que paralisa seu ser inteiro.",
+            "Alguém 'semelhante ao Filho do Homem'. Mas não é o humilde carpinteiro da Galileia...",
+            "É Cristo em sua glória divina revelada em toda sua magnitude."
+          ]
+        },
+        {
+          title: "Sua Aparência Divina",
+          image: "/images/apocalypse/divine-appearance.jpg",
+          overlayClass: "light",
+          effects: ["divine-presence", "holy-light"],
+          narrative: [
+            "Seus olhos mal conseguem suportar a visão.",
+            "Cabelos brancos como neve irradiam sabedoria eterna. Olhos como chamas de fogo parecem enxergar através de sua alma.",
+            "Seus pés, como bronze polido, pisam entre os candeeiros com autoridade divina."
+          ]
+        },
+        {
+          title: "Seu Poder e Glória",
+          image: "/images/apocalypse/christ-glory.jpg",
+          overlayClass: "dramatic",
+          effects: ["divine-presence", "holy-light"],
+          narrative: [
+            "Em sua mão direita, sete estrelas brilham intensamente. De sua boca sai uma espada afiada de dois gumes.",
+            "Seu rosto... é como contemplar o sol do meio-dia sem proteção.",
+            "A glória é insuportável. O temor, esmagador."
+          ]
+        },
+        {
+          title: "Prostrado como Morto",
+          image: "/images/apocalypse/john-fallen.jpg",
+          overlayClass: "dark",
+          effects: [],
+          narrative: [
+            "Você cai aos seus pés como morto.",
+            "Nenhuma força resta em seu corpo. Nenhuma palavra sai de seus lábios.",
+            "Diante de tal majestade, você é apenas pó e cinzas."
+          ]
+        },
+        {
+          title: "Conforto Divino",
+          image: "/images/apocalypse/divine-touch.jpg",
+          overlayClass: "light",
+          effects: ["divine-presence"],
+          narrative: [
+            "Então, quando pensa que não pode suportar mais, uma mão toca seu ombro.",
+            "A mesma mão que segura as sete estrelas agora traz conforto, e você ouve:",
+            "'Não tenha medo. EU SOU o Primeiro e o Último, o que vive. Estive morto, mas eis que estou vivo para todo o sempre! E tenho as chaves da morte e do Hades.'"
+          ]
+        }
+      ],
+
+      // Conteúdo da etapa 3: Significado
+      symbols: [
+        {
+          name: "Os Sete Candeeiros de Ouro",
+          icon: "🕯️",
+          description: "João viu sete candeeiros de ouro, com Cristo andando entre eles.",
+          scripture: "O mistério das sete estrelas... e dos sete candeeiros de ouro. Os sete candeeiros que viste são as sete igrejas.",
+          reference: "Apocalipse 1:20",
+          meaning: "Os candeeiros representam as sete igrejas da Ásia. Como candeeiros, a função da Igreja é refletir a luz de Cristo no mundo. O ouro simboliza o valor e a preciosidade da Igreja aos olhos de Deus."
+        },
+        {
+          name: "Vestes Longas e Cinto de Ouro",
+          icon: "👘",
+          description: "Cristo aparece vestido com uma roupa que chegava até os pés e um cinto de ouro ao peito.",
+          scripture: "...vestido com uma roupa que chegava até aos pés, e cingido pelo peito com um cinto de ouro.",
+          reference: "Apocalipse 1:13",
+          meaning: "As vestes longas e o cinto remetem às vestimentas do Sumo Sacerdote no Antigo Testamento. Cristo é mostrado em Seu ofício sacerdotal, mediando entre Deus e a humanidade. O cinto de ouro simboliza realeza e dignidade."
+        },
+        {
+          name: "Cabelos Brancos como Lã",
+          icon: "⚪",
+          description: "Os cabelos de Cristo são descritos como brancos, como lã, como neve.",
+          scripture: "E a sua cabeça e cabelos eram brancos como lã branca, como a neve...",
+          reference: "Apocalipse 1:14",
+          meaning: "Cabelos brancos simbolizam sabedoria, pureza e eternidade. Esta imagem conecta Cristo ao 'Ancião de Dias' em Daniel 7:9, declarando Sua divindade e natureza eterna, compartilhada com o Pai."
+        },
+        {
+          name: "Olhos como Chama de Fogo",
+          icon: "🔥",
+          description: "Os olhos de Cristo são descritos como chamas de fogo ardentes.",
+          scripture: "E os seus olhos eram como chama de fogo.",
+          reference: "Apocalipse 1:14",
+          meaning: "Olhos de fogo simbolizam discernimento perfeito, julgamento penetrante e conhecimento completo. Nada pode ser escondido da vista de Cristo - Ele vê através de todas as pretensões e enganos."
+        },
+        {
+          name: "Pés como Bronze Polido",
+          icon: "🦶",
+          description: "Seus pés são semelhantes ao bronze refinado numa fornalha ardente.",
+          scripture: "E os seus pés, semelhantes a latão reluzente, como se tivessem sido refinados numa fornalha...",
+          reference: "Apocalipse 1:15",
+          meaning: "O bronze refinado no fogo representa pureza, estabilidade e julgamento. Os pés simbolizam o fundamento sobre o qual Cristo se mantém - imutável e inabalável. Também sugere Seu poder para esmagar Seus inimigos."
+        },
+        {
+          name: "Voz como Muitas Águas",
+          icon: "🌊",
+          description: "Sua voz é descrita como o som de muitas águas.",
+          scripture: "E a sua voz era como a voz de muitas águas.",
+          reference: "Apocalipse 1:15",
+          meaning: "A voz como muitas águas evoca o poder esmagador de cataratas ou do oceano - irresistível, majestosa e autorizada. É a voz do Criador que falou e o universo veio à existência."
+        },
+        {
+          name: "Sete Estrelas na Mão Direita",
+          icon: "⭐",
+          description: "Cristo segura sete estrelas em Sua mão direita.",
+          scripture: "Tinha na sua destra sete estrelas... As sete estrelas são os anjos das sete igrejas.",
+          reference: "Apocalipse 1:16, 20",
+          meaning: "As estrelas representam os 'anjos' ou mensageiros/líderes das sete igrejas. Estando na mão direita de Cristo, simboliza que Ele os protege, dirige e tem autoridade sobre eles. A liderança da igreja é um dom de Cristo para Seu povo."
+        },
+        {
+          name: "Espada de Dois Gumes",
+          icon: "⚔️",
+          description: "Da boca de Cristo sai uma espada afiada de dois gumes.",
+          scripture: "E da sua boca saía uma aguda espada de dois fios...",
+          reference: "Apocalipse 1:16",
+          meaning: "A espada representa a Palavra de Deus - penetrante, poderosa e decisiva. Saindo de Sua boca, mostra que Suas palavras têm poder de julgamento e de separar a verdade da mentira."
+        },
+        {
+          name: "Face como o Sol",
+          icon: "☀️",
+          description: "O rosto de Cristo brilha com intensidade insuportável, como o sol do meio-dia.",
+          scripture: "E o seu rosto era como o sol, quando resplandece na sua força.",
+          reference: "Apocalipse 1:16",
+          meaning: "O rosto que foi cuspido e golpeado agora brilha como o sol em sua força. A humilhação deu lugar à exaltação suprema. O mesmo Jesus que foi desprezado agora é a fonte de toda luz e glória."
+        },
+        {
+          name: "As Chaves da Morte e do Hades",
+          icon: "🔑",
+          description: "Cristo declara que possui as chaves da morte e do Hades (o reino dos mortos).",
+          scripture: "E o que vive; fui morto, mas eis aqui estou vivo para todo o sempre, Amém. E tenho as chaves da morte e do inferno.",
+          reference: "Apocalipse 1:18",
+          meaning: "Chaves simbolizam autoridade e acesso. Ao possuir as chaves da morte e do Hades, Cristo demonstra que venceu os maiores inimigos da humanidade através de Sua própria morte e ressurreição. Ele agora controla o destino eterno de todos e pode libertar os cativos."
         }
       ]
-    }
-  },
-  computed: {
-    allBlocksCompleted() {
-      return this.completedBlocks.length === this.blocks.length;
-    }
+    };
   },
   methods: {
-    showIntroScreen() {
-      // Mostrar a tela de introdução quando o usuário clica em "Toque para iniciar"
-      this.showTutorial = true;
-
-      // Garantir que o scroll esteja disponível
-      document.body.style.overflow = 'auto';
-      document.body.style.height = 'auto';
-
-      // Salvar que a introdução foi mostrada
-      try {
-        localStorage.setItem('apocalypse-intro-seen', 'true');
-      } catch (error) {
-        console.error('Erro ao salvar estado da introdução:', error);
+    // Navegação entre etapas
+    navigateToStage(stageId) {
+      // Permite navegação apenas para etapas já vistas ou a próxima
+      if (stageId <= Math.max(this.currentStage, 1)) {
+        this.currentStage = stageId;
+        this.scrollToTop();
       }
     },
 
-    selectBlock(blockId) {
-      this.activeBlock = blockId;
-      this.dismissTutorial();
-      this.showIntroduction = false;
-
-      // Adicionar uma classe ao body para impedir rolagem enquanto estiver em um bloco
-      document.body.classList.add('immersive-mode');
-
-      // Rolar para o topo quando selecionar um bloco
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-
-      // Parar animação de atenção
-      this.stopAttentionAnimation();
+    completeCurrentStage() {
+      if (this.currentStage < 3) {
+        this.currentStage++;
+        this.scrollToTop();
+      }
     },
 
-    completeBlock(blockId, action = null) {
-      // Adicionar à lista de blocos concluídos se ainda não estiver
-      if (!this.completedBlocks.includes(blockId)) {
-        this.completedBlocks.push(blockId);
-        this.lastCompletedBlock = blockId;
-
-        // Salvar o progresso
-        this.saveProgress();
-      }
-
-      // Emitir evento para o componente pai
-      this.$emit('return-to-selection', blockId);
-
-      // Se a ação for "next", ir para o próximo bloco
-      if (action === 'next') {
-        const nextBlockId = blockId + 1;
-        if (this.blocks.find(block => block.id === nextBlockId)) {
-          this.selectBlock(nextBlockId);
-          return;
-        }
-      }
-
-      // Se não houver próximo bloco ou se action não for 'next',
-      // voltar para a seleção de blocos
-      this.returnToBlocks();
-    },
-
-    returnToBlocks() {
-      // Remover a classe do body que impede rolagem
-      document.body.classList.remove('immersive-mode');
-
-      // Restaurar scroll
-      document.body.style.overflow = 'auto';
-      document.body.style.height = 'auto';
-
-      // Redefinir bloco ativo
-      this.activeBlock = null;
-      this.showIntroduction = false;
-
-      // Rolar para o topo quando voltar para seleção
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-
-      // Se todos os blocos foram completados, destacar o botão de conclusão
-      if (this.allBlocksCompleted) {
-        setTimeout(() => {
-          const completionBtn = document.querySelector('.btn-complete');
-          if (completionBtn) {
-            completionBtn.classList.add('highlight-attention');
-            setTimeout(() => {
-              completionBtn.classList.remove('highlight-attention');
-            }, 2000);
-          }
-        }, 500);
-      } else {
-        // Se ainda houver blocos não concluídos, iniciar animação de atenção
-        this.startAttentionAnimation();
+    previousStage() {
+      if (this.currentStage > 1) {
+        this.currentStage--;
+        this.scrollToTop();
       }
     },
 
     completeChapter() {
-      // Emitir evento para o componente pai saber que o capítulo foi concluído
+      // Mostrar modal de conclusão
+      this.showCompletionModal = true;
+
+      // Emitir evento para o componente pai
       this.$emit('complete', 1);
+
+      // Salvar progresso no localStorage
+      this.saveProgress();
     },
 
-    createStars() {
-      const starsContainer = document.querySelector('.stars-container');
-      if (!starsContainer) return;
-
-      const starCount = 100;
-
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-
-        // Posicionar aleatoriamente
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-
-        // Tamanho aleatório
-        const size = Math.random() * 2 + 1;
-
-        // Tempo de animação aleatório
-        const duration = Math.random() * 3 + 2;
-
-        star.style.left = `${x}%`;
-        star.style.top = `${y}%`;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.animationDuration = `${duration}s`;
-
-        starsContainer.appendChild(star);
-      }
-    },
-
-    dismissTutorial() {
-      this.showTutorial = false;
-      clearTimeout(this.tutorialTimeout);
-
-      // Salvar que o tutorial foi visto
-      try {
-        localStorage.setItem('apocalypse-tutorial-seen', 'true');
-      } catch (error) {
-        console.error('Erro ao salvar estado do tutorial:', error);
-      }
-
-      // Iniciar animação de atenção para os blocos
-      this.startAttentionAnimation();
-    },
-
-    startAttentionAnimation() {
-      // Limpar intervalo existente se houver
-      if (this.attentionInterval) {
-        clearInterval(this.attentionInterval);
-      }
-
-      // Ativar a animação de atenção
-      this.needsAttention = true;
-
-      // Alternar a animação periodicamente
-      this.attentionInterval = setInterval(() => {
-        this.needsAttention = !this.needsAttention;
-      }, 3000);
-
-      // Parar a animação após 15 segundos
-      setTimeout(() => {
-        this.stopAttentionAnimation();
-      }, 15000);
-    },
-
-    stopAttentionAnimation() {
-      if (this.attentionInterval) {
-        clearInterval(this.attentionInterval);
-        this.attentionInterval = null;
-      }
-      this.needsAttention = false;
-    },
-
-    // Funções para salvar e carregar progresso
     saveProgress() {
       try {
-        localStorage.setItem('apocalypse-chapter1-completed', JSON.stringify(this.completedBlocks));
-        localStorage.setItem('apocalypse-chapter1-last-completed', this.lastCompletedBlock?.toString() || '');
+        const progress = JSON.parse(localStorage.getItem('apocalypse-progress') || '{}');
+        progress['chapter-1'] = {
+          completed: true,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('apocalypse-progress', JSON.stringify(progress));
       } catch (error) {
         console.error('Erro ao salvar progresso:', error);
       }
     },
 
-    loadProgress() {
-      try {
-        // Carregar blocos concluídos
-        const saved = localStorage.getItem('apocalypse-chapter1-completed');
-        if (saved) {
-          this.completedBlocks = JSON.parse(saved);
-        }
-
-        // Carregar último bloco concluído
-        const lastCompleted = localStorage.getItem('apocalypse-chapter1-last-completed');
-        if (lastCompleted) {
-          this.lastCompletedBlock = parseInt(lastCompleted) || null;
-        }
-
-        // Verificar se o tutorial/introdução já foi visto
-        const tutorialSeen = localStorage.getItem('apocalypse-tutorial-seen');
-        const introSeen = localStorage.getItem('apocalypse-intro-seen');
-
-        if (tutorialSeen === 'true' && introSeen === 'true') {
-          // Se ambos já foram vistos, não mostrar nada
-          this.showTutorial = false;
-          this.showIntroduction = false;
-        } else if (introSeen === 'true') {
-          // Se a introdução foi vista mas o tutorial não, mostrar tutorial
-          this.showTutorial = true;
-          this.showIntroduction = false;
-
-          // Timeout para auto-dismissal do tutorial se o usuário não interagir
-          this.tutorialTimeout = setTimeout(() => {
-            this.dismissTutorial();
-          }, 10000);
-        } else if (this.completedBlocks.length > 0) {
-          // Não mostrar introdução/tutorial se já há progresso
-          this.showTutorial = false;
-          this.showIntroduction = false;
-        } else {
-          // Padrão: não mostrar nada, esperar clique no "Toque para iniciar"
-          this.showTutorial = false;
-          this.showIntroduction = false;
-        }
-      } catch (error) {
-        console.error('Erro ao carregar progresso:', error);
+    // Navegação entre slides da etapa 1
+    prevContextSlide() {
+      if (this.currentContextSlide > 0) {
+        this.currentContextSlide--;
       }
     },
 
-    // Adicionar atributos de dados aos blocos para seleção mais fácil
-    addBlockDataAttributes() {
-      this.$nextTick(() => {
-        const blockCards = document.querySelectorAll('.block-card');
-        blockCards.forEach((card, index) => {
-          const blockId = this.blocks[index].id;
-          card.setAttribute('data-id', blockId);
-        });
+    nextContextSlide() {
+      if (this.currentContextSlide < this.contextSlides.length - 1) {
+        this.currentContextSlide++;
+      }
+    },
+
+    goToContextSlide(index) {
+      if (index >= 0 && index < this.contextSlides.length) {
+        this.currentContextSlide = index;
+      }
+    },
+
+    // Navegação entre slides da etapa 2
+    prevRevelationSlide() {
+      if (this.currentRevelationSlide > 0) {
+        this.currentRevelationSlide--;
+      }
+    },
+
+    nextRevelationSlide() {
+      if (this.currentRevelationSlide < this.revelationSlides.length - 1) {
+        this.currentRevelationSlide++;
+      }
+    },
+
+    goToRevelationSlide(index) {
+      if (index >= 0 && index < this.revelationSlides.length) {
+        this.currentRevelationSlide = index;
+      }
+    },
+
+// Interação com cartões de símbolos
+toggleSymbol(index) {
+      if (this.expandedSymbol === index) {
+        this.expandedSymbol = null;
+      } else {
+        this.expandedSymbol = index;
+
+        // Scrollar para o símbolo expandido em dispositivos móveis
+        if (window.innerWidth <= 768) {
+          this.$nextTick(() => {
+            const symbolElement = document.querySelectorAll('.symbol-card')[index];
+            if (symbolElement) {
+              symbolElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+      }
+    },
+
+    // Navegação geral
+    scrollToTop() {
+      // Rolagem suave para o topo da seção de conteúdo
+      window.scrollTo({
+        top: this.$refs.chapterContainer.offsetTop - 70, // Offset para o cabeçalho fixo
+        behavior: 'smooth'
       });
+    },
+
+    exitExperience() {
+      // Sair do modo tela cheia, se estiver ativo
+      if (this.isFullscreen) {
+        this.exitFullscreenMode();
+      }
+
+      // Navegar de volta para a seleção de capítulos
+      this.$router.push('/apocalypse');
+    },
+
+    returnToChapterSelection() {
+      this.closeCompletionModal();
+      this.exitExperience();
+    },
+
+    closeCompletionModal() {
+      this.showCompletionModal = false;
+    },
+
+    // Controle de tela cheia
+    toggleFullscreen() {
+      if (!this.isFullscreen) {
+        this.enterFullscreenMode();
+      } else {
+        this.exitFullscreenMode();
+      }
+    },
+
+    enterFullscreenMode() {
+      const element = this.$refs.chapterContainer;
+
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    },
+
+    exitFullscreenMode() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    },
+
+    handleFullscreenChange() {
+      this.isFullscreen = !!(document.fullscreenElement ||
+                            document.mozFullScreenElement ||
+                            document.webkitFullscreenElement ||
+                            document.msFullscreenElement);
+    },
+
+    // Navegação por teclado
+    handleKeydown(event) {
+      // Navegação por teclado para etapas
+      if (event.key === 'ArrowRight' && !this.showCompletionModal) {
+        if (this.currentStage === 1) {
+          this.nextContextSlide();
+        } else if (this.currentStage === 2) {
+          this.nextRevelationSlide();
+        }
+      } else if (event.key === 'ArrowLeft' && !this.showCompletionModal) {
+        if (this.currentStage === 1) {
+          this.prevContextSlide();
+        } else if (this.currentStage === 2) {
+          this.prevRevelationSlide();
+        }
+      } else if (event.key === 'Escape') {
+        if (this.isFullscreen) {
+          this.exitFullscreenMode();
+        } else if (this.showCompletionModal) {
+          this.closeCompletionModal();
+        }
+      }
     }
   },
   mounted() {
-    this.createStars();
-    this.loadProgress();
-    this.addBlockDataAttributes();
+    // Adicionar listeners para o modo tela cheia
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange);
 
-    // Adicionar atributos especiais para acessibilidade
-    this.$nextTick(() => {
-      const blockCards = document.querySelectorAll('.block-card');
-      blockCards.forEach(card => {
-        card.setAttribute('role', 'button');
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('aria-label', `Iniciar ${card.querySelector('.block-title').textContent}`);
-      });
-    });
+    // Adicionar listener para navegação por teclado
+    window.addEventListener('keydown', this.handleKeydown);
 
-    // Garantir que o scroll esteja habilitado
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
+    // Verificar se há um parâmetro de etapa na URL
+    const stageParam = this.$route.query.stage;
+    if (stageParam && !isNaN(parseInt(stageParam))) {
+      const stage = parseInt(stageParam);
+      if (stage >= 1 && stage <= 3) {
+        this.currentStage = stage;
+      }
+    }
   },
   beforeUnmount() {
-    // Limpar timers
-    clearTimeout(this.tutorialTimeout);
-    clearInterval(this.attentionInterval);
+    // Remover listeners
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange);
+    window.removeEventListener('keydown', this.handleKeydown);
 
-    // Garantir que a classe immersive-mode seja removida do body
-    document.body.classList.remove('immersive-mode');
-
-    // Restaurar scroll
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
+    // Garantir que o modo tela cheia seja desativado
+    if (this.isFullscreen) {
+      this.exitFullscreenMode();
+    }
   }
 }
 </script>
 
 <style scoped>
-.apocalypse-chapter1 {
-  position: relative;
+.apocalypse-chapter {
   min-height: 100vh;
-  width: 100%;
-  max-width: 1200px;
+  position: relative;
+}
+
+/* Cabeçalho */
+.chapter-header {
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.stars-container {
-  position: fixed;
+.chapter-title {
+  font-size: 3rem;
+  color: var(--color-secondary);
+  margin-bottom: 0.5rem;
+  animation: glow 3s infinite alternate;
+  letter-spacing: 0.05em;
+}
+
+.chapter-subtitle {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  font-family: var(--font-family-quote);
+  font-style: italic;
+}
+
+/* Navegação de progresso */
+.progress-navigation {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.progress-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1.2rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.7;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 250px;
+}
+
+.progress-stage.active {
+  opacity: 1;
+  background-color: rgba(75, 46, 131, 0.3);
+  border-color: var(--color-secondary);
+}
+
+.progress-stage.current {
+  transform: scale(1.03);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stage-number {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  font-weight: bold;
+  color: var(--color-text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-stage.active .stage-number {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+  border-color: var(--color-secondary);
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-name {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: var(--color-secondary-light);
+}
+
+.stage-description {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Conteúdo da etapa */
+.stage-content {
+  padding: 1rem;
+}
+
+.stage-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 0.8s ease;
+}
+
+.stage-section {
+  padding: 2rem;
+}
+
+.section-title {
+  text-align: center;
+  color: var(--color-secondary);
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Slider da etapa 1 */
+.context-slider {
+  position: relative;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.slider-controls {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.control-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.control-btn:hover:not(:disabled) {
+  background-color: rgba(75, 46, 131, 0.6);
+  transform: translateY(-3px);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-icon {
+  font-size: 1.2rem;
+}
+
+.slide-indicators {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.slide-indicator {
+  width: 10px;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.slide-indicator.active {
+  background-color: var(--color-secondary);
+  transform: scale(1.2);
+}
+
+.context-slide {
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.slide-overlay {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: -1;
-  overflow: hidden;
-}
-
-.star {
-  position: absolute;
-  background-color: white;
-  border-radius: 50%;
-  opacity: 0.8;
-  animation: twinkle var(--transition-slow) infinite alternate;
-}
-
-@keyframes twinkle {
-  from { opacity: 0.2; }
-  to { opacity: 0.8; }
-}
-
-.chapter-header {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-  animation: fadeIn 1s ease;
-  padding: var(--space-lg);
-  border-radius: var(--radius-md);
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(196, 180, 84, 0.2);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.chapter-header::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(196, 180, 84, 0.3) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0.5);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  pointer-events: none;
-}
-
-.chapter-header:hover {
-  background-color: rgba(75, 46, 131, 0.3);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  border-color: var(--color-secondary);
-}
-
-.chapter-header:hover::after {
-  opacity: 0.4;
-  transform: scale(1);
-}
-
-.chapter-header:active {
-  transform: translateY(0);
-  transition: transform 0.2s ease;
-}
-
-.chapter-title {
-  font-size: 2.5rem;
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-  text-shadow: 0 0 10px rgba(196, 180, 84, 0.5);
-}
-
-.chapter-description {
-  max-width: 700px;
-  margin: 0 auto;
-  color: var(--color-text);
-  font-size: 1.1rem;
-  line-height: 1.6;
-}
-
-.chapter-action-hint {
-  margin-top: var(--space-md);
-  color: var(--color-secondary);
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-  animation: pulseOpacity 2s infinite;
-}
-
-@keyframes pulseOpacity {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-.blocks-instruction {
-  color: var(--color-text);
-  margin-bottom: var(--space-lg);
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 500;
-  animation: glow 2s infinite alternate;
-}
-
-@keyframes glow {
-  from { text-shadow: 0 0 2px rgba(196, 180, 84, 0.3); }
-  to { text-shadow: 0 0 10px rgba(196, 180, 84, 0.8); }
-}
-
-.blocks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-lg);
-  margin-bottom: var(--space-xl);
-  animation: fadeIn 1s ease;
-}
-
-.block-card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  text-align: center;
-  transition: all var(--transition-normal);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-.block-card::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(196, 180, 84, 0.3) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0.5);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  pointer-events: none;
-}
-
-.block-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  background-color: rgba(75, 46, 131, 0.3);
-}
-
-.block-card:hover::after {
-  opacity: 0.4;
-  transform: scale(1);
-}
-
-.block-card:active {
-  transform: translateY(0);
-  transition: transform 0.2s ease;
-}
-
-.block-card.completed {
-  border-color: var(--color-secondary);
-  background-color: rgba(196, 180, 84, 0.1);
-}
-
-.block-card.highlight-completed {
-  animation: highlightSuccess 2s ease;
-}
-
-.block-card.highlight-recent {
-  border: 2px solid var(--color-secondary);
-  box-shadow: 0 0 20px rgba(196, 180, 84, 0.5);
-  animation: pulseRecent 2s infinite alternate;
-}
-
-@keyframes pulseRecent {
-  from { box-shadow: 0 0 10px rgba(196, 180, 84, 0.3); }
-  to { box-shadow: 0 0 20px rgba(196, 180, 84, 0.7); }
-}
-
-@keyframes highlightSuccess {
-  0%, 100% { box-shadow: var(--shadow-md); }
-  50% { box-shadow: 0 0 30px rgba(196, 180, 84, 0.6); }
-}
-
-.block-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  position: relative;
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
 
-.block-icon {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-md);
+.slide-overlay.dark {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+}
+
+.slide-overlay.light {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4));
+}
+
+.slide-overlay.dramatic {
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.8));
+}
+
+.slide-content {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   color: var(--color-text);
-  transition: transform 0.3s ease;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-.block-card:hover .block-icon {
-  transform: scale(1.1);
-}
-
-.block-card.completed .block-icon {
+.slide-title {
+  font-size: 2rem;
   color: var(--color-secondary);
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
 }
 
-.block-title {
+.slide-text p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+  font-size: 1.1rem;
+}
+
+/* Experiência de revelação da etapa 2 */
+.revelation-experience {
+  position: relative;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.experience-controls {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.revelation-scene {
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.scene-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.scene-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.holy-light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 253, 230, 0.4) 0%, rgba(255, 253, 230, 0) 70%);
+  animation: pulse-light 8s infinite alternate;
+}
+
+.celestial-rays {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 230, 0.1) 0%,
+    rgba(255, 253, 230, 0) 50%,
+    rgba(255, 253, 230, 0.1) 100%
+  );
+  opacity: 0.8;
+  animation: rotate 120s linear infinite;
+}
+
+.divine-presence {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 253, 230, 0.2) 0%, transparent 70%);
+  animation: pulse-presence 10s infinite;
+}
+
+.scene-content {
+  position: relative;
+  z-index: 3;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--color-text);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.scene-title {
+  font-size: 2rem;
+  color: var(--color-secondary);
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+.scene-narrative p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+  font-size: 1.1rem;
+}
+
+/* Símbolos da etapa 3 */
+.symbols-introduction {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+}
+
+.symbols-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.symbol-card {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.symbol-card:hover {
+  background-color: rgba(75, 46, 131, 0.3);
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.symbol-card.expanded {
+  background-color: rgba(75, 46, 131, 0.3);
+  border-color: var(--color-secondary);
+  grid-column: 1 / -1;
+  cursor: default;
+}
+
+.symbol-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.symbol-icon {
+  font-size: 1.5rem;
+}
+
+.symbol-name {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.expand-icon {
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-normal);
+}
+
+.symbol-card.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+.symbol-details {
+  padding: 0 1rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.symbol-description {
+  grid-column: 1 / -1;
+  line-height: 1.6;
+}
+
+.scripture-reference {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--color-secondary);
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.scripture-text {
+  font-family: var(--font-family-quote);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+.scripture-ref {
+  display: block;
+  text-align: right;
+  color: var(--color-secondary);
+  font-weight: 500;
+}
+
+.symbol-meaning {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.symbol-meaning h5 {
   color: var(--color-secondary-light);
-  margin-bottom: var(--space-md);
+  margin-bottom: 0.5rem;
+}
+
+/* Reflexão final */
+.final-reflection {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+  border-left: 3px solid var(--color-secondary);
+}
+
+.final-reflection h4 {
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
   font-size: 1.3rem;
 }
 
-.block-description {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  margin-bottom: var(--space-lg);
-  line-height: 1.5;
-  flex-grow: 1;
+.final-reflection p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
 }
 
-.block-card.completed .block-description {
-  color: var(--color-text);
+.final-reflection p:last-child {
+  margin-bottom: 0;
 }
 
-.block-status {
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-sm);
+/* Botões de ação da etapa */
+.stage-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
-.status-completed {
-  color: var(--color-secondary);
+.action-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-}
-
-.check-icon {
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
-
-.status-available {
-  color: var(--color-text);
-  opacity: 0.9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-}
-
-.tap-icon {
-  animation: tapPulse 1.5s infinite;
-  transform-origin: bottom center;
-}
-
-@keyframes tapPulse {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.block-action-hint {
-  margin-top: var(--space-sm);
-}
-
-.start-btn {
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  border: none;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
   border-radius: var(--radius-md);
-  padding: var(--space-sm) var(--space-lg);
-  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-normal);
-  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-family-heading);
+  font-weight: 500;
 }
 
-.completed-btn {
-  background-color: var(--color-primary);
-  border: 1px solid var(--color-secondary);
+.next-stage-btn {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
 }
 
-.block-card:hover .start-btn {
+.next-stage-btn:hover {
   background-color: var(--color-secondary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
 }
 
-/* Animação de atenção para blocos */
-.block-card.pulse-attention {
-  animation: pulseAttention 2s infinite;
+.prev-stage-btn {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
 }
 
-@keyframes pulseAttention {
-  0%, 100% { transform: translateY(0); box-shadow: var(--shadow-md); }
-  50% { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(196, 180, 84, 0.4); }
+.prev-stage-btn:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+  transform: translateY(-3px);
 }
 
-.active-block-container {
-  position: relative;
-  margin-bottom: var(--space-xl);
-  animation: fadeIn 0.5s ease;
-  min-height: 100vh;
+.complete-btn {
+  background-color: var(--color-success);
+  color: var(--color-background);
+  border-color: var(--color-success);
 }
 
-.block-navigation {
-  margin-top: var(--space-xl);
-  text-align: center;
+.complete-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
-.block-navigation.fixed {
+.btn-icon {
+  transition: transform var(--transition-fast);
+}
+
+.next-stage-btn:hover .btn-icon,
+.complete-btn:hover .btn-icon {
+  transform: translateX(3px);
+}
+
+.prev-stage-btn:hover .btn-icon {
+  transform: translateX(-3px);
+}
+
+/* Navegação fixa */
+.fixed-navigation {
   position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  margin-top: 0;
-  width: auto;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 100;
 }
 
 .nav-btn {
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--color-text);
-  padding: var(--space-xs) var(--space-lg);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-family: var(--font-family-heading);
-  font-size: 0.95rem;
-  transition: all var(--transition-normal);
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
 }
 
 .nav-btn:hover {
-  background-color: rgba(75, 46, 131, 0.7);
-  transform: translateY(-2px);
-}
-
-.nav-btn:active {
-  transform: translateY(0);
+  background-color: rgba(75, 46, 131, 0.6);
+  transform: translateY(-3px);
 }
 
 .nav-icon {
   font-size: 1.2rem;
 }
 
-.chapter-completion {
-  text-align: center;
-  margin: var(--space-xl) 0;
-  padding: var(--space-lg);
-  background-color: rgba(196, 180, 84, 0.1);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-secondary);
-  animation: pulseGlow 2s infinite alternate;
-}
-
-@keyframes pulseGlow {
-  from { box-shadow: 0 0 5px rgba(196, 180, 84, 0.3); }
-  to { box-shadow: 0 0 15px rgba(196, 180, 84, 0.5); }
-}
-
-.completion-message {
-  margin-bottom: var(--space-md);
-  color: var(--color-secondary);
-  font-size: 1.1rem;
-}
-
-.btn-complete {
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  font-weight: 600;
-  padding: var(--space-sm) var(--space-xl);
-  font-size: 1.1rem;
-}
-
-.btn-complete:hover {
-  background-color: var(--color-secondary-light);
-  transform: translateY(-2px);
-}
-
-.btn-complete.highlight-attention {
-  animation: highlightAttention 2s ease;
-}
-
-@keyframes highlightAttention {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(196, 180, 84, 0.6); }
-}
-
-.chapter-footer {
-  margin-top: var(--space-xxl);
-  padding-top: var(--space-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.scripture-reference {
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.scripture-reference blockquote {
-  font-family: var(--font-family-quote);
-  font-size: 1.2rem;
-  font-style: italic;
-  line-height: 1.7;
-  color: var(--color-text);
-  position: relative;
-}
-
-.scripture-reference blockquote::before {
-  content: '"';
-  font-size: 3rem;
-  color: var(--color-secondary);
-  opacity: 0.5;
-  position: absolute;
-  top: -20px;
-  left: -15px;
-}
-
-.scripture-reference cite {
-  display: block;
-  margin-top: var(--space-md);
-  color: var(--color-secondary);
-  font-style: normal;
-  font-weight: 500;
-}
-
-/* Tutorial overlay */
-.tutorial-overlay {
+/* Modal de conclusão */
+.completion-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
-  animation: fadeIn 0.5s ease;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(5px);
 }
 
-.tutorial-content {
+.modal-content {
+  position: relative;
   background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: var(--space-xl);
-  max-width: 600px;
-  width: 90%;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: scaleIn 0.3s ease forwards;
+}
+
+.modal-title {
+  color: var(--color-secondary);
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
   text-align: center;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-secondary);
-  animation: scaleIn 0.5s ease;
 }
 
-@keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.modal-message {
+  margin-bottom: 2rem;
 }
 
-.tutorial-content h3 {
-  color: var(--color-secondary);
-  margin-bottom: var(--space-md);
-  font-size: 1.5rem;
+.modal-message p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
 }
 
-.tutorial-steps {
-  margin: var(--space-lg) 0;
-}
-
-.tutorial-step {
+.modal-actions {
   display: flex;
-  align-items: flex-start;
-  margin-bottom: var(--space-md);
-  text-align: left;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  transition: all 0.3s ease;
-}
-
-.tutorial-step:hover {
-  background-color: rgba(75, 46, 131, 0.2);
-  transform: translateY(-3px);
-}
-
-.step-number {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: var(--color-secondary);
-  color: var(--color-background);
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-weight: bold;
-  margin-right: var(--space-md);
-  flex-shrink: 0;
 }
 
-.step-info {
-  flex: 1;
-}
-
-.step-info h4 {
-  color: var(--color-secondary);
-  margin-bottom: var(--space-xs);
-  font-size: 1.1rem;
-}
-
-.step-info p {
-  color: var(--color-text);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.tutorial-dismiss {
-  padding: var(--space-sm) var(--space-xl);
-  animation: pulseDismiss 2s infinite;
-  margin-top: var(--space-md);
-}
-
-@keyframes pulseDismiss {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+/* Animações */
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 15px rgba(196, 180, 84, 0.5); }
+  50% { text-shadow: 0 0 25px rgba(196, 180, 84, 0.8); }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Body class para modo imersivo */
-:global(body.immersive-mode) {
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-light {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-presence {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+/* Transições */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease-out;
+  max-height: 1000px;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
   overflow: hidden;
-  height: 100vh;
-  position: fixed;
-  width: 100%;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 
 /* Responsividade */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .chapter-title {
-    font-size: 1.8rem;
+    font-size: 2.5rem;
   }
 
-  .chapter-description {
-    font-size: 1rem;
+  .progress-navigation {
+    flex-direction: column;
+    align-items: center;
   }
 
-  .blocks-grid {
+  .progress-stage {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .symbols-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .symbol-details {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
-    padding: 0 var(--space-sm);
   }
 
-  .block-card {
-    padding: var(--space-md);
+  .scripture-reference,
+  .symbol-meaning {
+    grid-column: 1;
   }
 
-  .scripture-reference blockquote {
+  .symbol-meaning {
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .chapter-header {
+    padding: 2rem 1rem 1rem;
+  }
+
+  .chapter-title {
+    font-size: 2rem;
+  }
+
+  .chapter-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+  }
+
+  .stage-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .slide-title,
+  .scene-title {
+    font-size: 1.7rem;
+  }
+
+  .context-slide,
+  .revelation-scene {
+    height: 350px;
+  }
+
+  .slide-text p,
+  .scene-narrative p {
     font-size: 1rem;
   }
 
-  .nav-btn {
+  .stage-actions {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .action-btn {
     width: 100%;
     justify-content: center;
   }
 
-  .block-navigation.fixed {
-    width: 90%;
-    top: 5px;
+  .symbols-grid {
+    grid-template-columns: 1fr;
   }
 
-  .tutorial-content {
-    padding: var(--space-lg);
+  .fixed-navigation {
+    bottom: 1rem;
+    top: auto;
+    right: 1rem;
+    left: auto;
   }
 }
 
-/* Telas muito pequenas */
-@media (max-width: 375px) {
+@media (max-width: 480px) {
   .chapter-title {
+    font-size: 1.7rem;
+  }
+
+  .chapter-subtitle {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .context-slide,
+  .revelation-scene {
+    height: 300px;
+  }
+
+  .slide-title,
+  .scene-title {
     font-size: 1.5rem;
   }
 
-  .nav-btn {
-    font-size: 0.8rem;
-    padding: var(--space-xs) var(--space-md);
+  .control-btn {
+    width: 36px;
+    height: 36px;
   }
 
-  .block-icon {
-    font-size: 2rem;
+  .slide-indicators {
+    gap: 0.3rem;
   }
 
-  .block-title {
-    font-size: 1.1rem;
+  .slide-indicator {
+    width: 8px;
+    height: 8px;
   }
 
-  .tutorial-step {
-    flex-direction: column;
-    align-items: flex-start;
+  .modal-content {
+    padding: 1.5rem 1rem;
   }
 
-  .step-number {
-    margin-bottom: var(--space-xs);
+  .modal-title {
+    font-size: 1.5rem;
   }
 }
 </style>

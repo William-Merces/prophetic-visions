@@ -1,51 +1,224 @@
+/* src/assets/styles/variables.css */
 :root {
-  /* Color Palette */
-  --color-primary: #4b2e83;      /* Deep Purple - Primary Color */
-  --color-primary-light: #6a4baf;
-  --color-primary-dark: #2c1b4d;
+  /* Paleta de Cores - Restauração da aparência original dourada */
+  --color-primary: #c4b454;         /* Dourado para elementos principais */
+  --color-primary-light: #d9cf82;   /* Dourado mais claro para hover */
+  --color-primary-dark: #9a8c2c;    /* Dourado mais escuro para detalhes */
 
-  --color-secondary: #c4b454;    /* Gold - Secondary Color */
+  /* Substituindo o roxo pelo dourado em toda a interface */
+  --color-secondary: #c4b454;       /* Dourado como cor secundária (substituindo roxo) */
   --color-secondary-light: #d9cf82;
   --color-secondary-dark: #9a8c2c;
 
-  --color-accent: #b7410e;       /* Bronze/Red - Accent Color */
+  --color-accent: #b7410e;          /* Bronze/laranja escuro para acentos especiais */
+  --color-accent-light: #d4622c;
+  --color-accent-dark: #8c300a;
 
-  --color-background: #000000;   /* Black background for celestial theme */
-  --color-background-alt: #121212;
-  --color-surface: #1e1e1e;
+  --color-success: #4caf50;         /* Verde para mensagens de sucesso */
+  --color-success-light: #80e27e;
+  --color-success-dark: #2e7d32;
 
-  --color-text: #ffffff;         /* White text on dark background */
-  --color-text-muted: #b0b0b0;
+  --color-warning: #ff9800;         /* Âmbar para avisos */
+  --color-warning-light: #ffb74d;
+  --color-warning-dark: #e65100;
 
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-error: #f44336;
+  --color-error: #f44336;           /* Vermelho para erros */
+  --color-error-light: #ef9a9a;
+  --color-error-dark: #b71c1c;
 
-  /* Typography */
-  --font-family-heading: 'Cinzel', serif;
-  --font-family-body: 'Spectral', serif;
-  --font-family-quote: 'Cormorant Garamond', serif;
+  --color-info: #2196f3;            /* Azul para informações */
+  --color-info-light: #64b5f6;
+  --color-info-dark: #0d47a1;
 
-  /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-xxl: 3rem;
+  /* Cores de Fundo - Preto profundo como no site antigo */
+  --color-background: #000000;      /* Preto absoluto para o fundo */
+  --color-background-alt: #050505;  /* Quase preto */
+  --color-surface: #0a0a0a;         /* Superfícies ligeiramente mais claras */
+  --color-surface-elevated: #101010;
+  --color-overlay: rgba(0, 0, 0, 0.9);
 
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Cores de Texto */
+  --color-text: #ffffff;            /* Texto principal branco */
+  --color-text-muted: #cccccc;      /* Texto secundário em cinza claro */
+  --color-text-subtle: #999999;
+  --color-text-on-primary: #000000; /* Texto sobre cor primária (botões dourados) */
+  --color-text-on-secondary: #000000; /* Texto sobre cor secundária (agora dourado) */
 
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.14);
+  --color-logo-text: #c4b454;       /* Dourado para o texto do logo */
+  --color-title-text: #c4b454;      /* Dourado para títulos principais */
 
-  /* Transitions */
+  /* Cores de Borda */
+  --color-border: rgba(196, 180, 84, 0.3); /* Borda dourada com transparência */
+  --color-border-light: rgba(255, 255, 255, 0.05);
+  --color-border-focus: rgba(196, 180, 84, 0.7);
+
+  /* Cores de Efeito */
+  --color-shadow: rgba(0, 0, 0, 0.8);
+  --color-glow: rgba(196, 180, 84, 0.6); /* Brilho dourado para títulos */
+  --color-divine-light: rgba(196, 180, 84, 0.2); /* Luz divina dourada */
+
+  /* Tipografia - Fontes elegantes como no site antigo */
+  --font-family-heading: 'Cinzel', serif; /* Fonte serifada elegante para títulos */
+  --font-family-body: 'Spectral', serif;  /* Fonte serifada para corpo de texto */
+  --font-family-quote: 'Cormorant Garamond', serif; /* Fonte para citações */
+
+  /* Tamanhos de Fonte */
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-md: 1.125rem;  /* 18px */
+  --font-size-lg: 1.25rem;   /* 20px */
+  --font-size-xl: 1.5rem;    /* 24px */
+  --font-size-2xl: 1.875rem; /* 30px */
+  --font-size-3xl: 2.25rem;  /* 36px */
+  --font-size-4xl: 3rem;     /* 48px */
+  --font-size-5xl: 3.75rem;  /* 60px */
+
+  /* Pesos de Fonte */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Espaçamento */
+  --space-xxxs: 0.125rem;  /* 2px */
+  --space-xxs: 0.25rem;    /* 4px */
+  --space-xs: 0.5rem;      /* 8px */
+  --space-sm: 0.75rem;     /* 12px */
+  --space-md: 1rem;        /* 16px */
+  --space-lg: 1.5rem;      /* 24px */
+  --space-xl: 2rem;        /* 32px */
+  --space-xxl: 3rem;       /* 48px */
+  --space-xxxl: 4rem;      /* 64px */
+  --space-huge: 6rem;      /* 96px */
+
+  /* Raios de Borda - Bordas sutis como no site antigo */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-xxl: 12px;
+  --radius-round: 50%;
+  --radius-pill: 9999px;
+
+  /* Larguras de Borda */
+  --border-width-thin: 1px;
+  --border-width-normal: 2px;
+  --border-width-thick: 3px;
+
+  /* Sombras - Com tom dourado para realce */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 36px rgba(0, 0, 0, 0.8);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-divine: 0 0 30px rgba(196, 180, 84, 0.4); /* Brilho dourado */
+  --shadow-golden: 0 0 20px rgba(196, 180, 84, 0.3); /* Brilho dourado mais sutil */
+
+  /* Transições */
   --transition-fast: 150ms ease;
   --transition-normal: 300ms ease;
   --transition-slow: 500ms ease;
+  --transition-very-slow: 1000ms ease;
+
+  /* Camadas Z-index */
+  --z-index-dropdown: 100;
+  --z-index-sticky: 200;
+  --z-index-fixed: 300;
+  --z-index-modal-backdrop: 400;
+  --z-index-modal: 500;
+  --z-index-popover: 600;
+  --z-index-tooltip: 700;
+  --z-index-toast: 800;
+
+  /* Layout */
+  --header-height: 70px;
+  --header-height-mobile: 60px;
+  --footer-height: 80px;
+  --sidebar-width: 280px;
+  --content-max-width: 1200px;
+  --container-padding: 1.5rem;
+  --container-padding-mobile: 1rem;
+
+  /* Tamanhos de Elementos */
+  --button-height: 40px;
+  --button-height-sm: 32px;
+  --button-height-lg: 48px;
+  --input-height: 40px;
+  --input-height-sm: 32px;
+  --input-height-lg: 48px;
+
+  /* Proporções */
+  --aspect-square: 1/1;
+  --aspect-video: 16/9;
+  --aspect-wide: 21/9;
+  --aspect-portrait: 3/4;
+
+  /* Gradientes Dourados para o site original */
+  --gradient-gold: linear-gradient(145deg, rgba(196, 180, 84, 0.9), rgba(154, 140, 44, 0.8));
+  --gradient-gold-subtle: linear-gradient(145deg, rgba(196, 180, 84, 0.3), rgba(154, 140, 44, 0.2));
+  --gradient-dark-gold: linear-gradient(145deg, rgba(30, 20, 0, 0.8), rgba(20, 10, 0, 0.9));
+
+  /* Efeitos Específicos */
+  --glow-gold: 0 0 15px rgba(196, 180, 84, 0.5);
+  --glow-gold-strong: 0 0 25px rgba(196, 180, 84, 0.8);
+  --text-shadow-gold: 0 0 10px rgba(196, 180, 84, 0.7);
+  --text-shadow-gold-strong: 0 0 20px rgba(196, 180, 84, 0.9);
+}
+
+/* Tema claro (mantido para compatibilidade, mas com cor dourada) */
+.light-theme {
+  --color-background: #f0efe9;      /* Bege claro para fundo */
+  --color-background-alt: #e6e4d9;  /* Bege mais escuro */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f9f9f9;
+  --color-overlay: rgba(255, 255, 255, 0.8);
+
+  --color-text: #121212;
+  --color-text-muted: #5e5e5e;
+  --color-text-subtle: #9e9e9e;
+
+  --color-primary: #9a8c2c;        /* Dourado mais escuro para contraste em fundo claro */
+  --color-primary-light: #c4b454;
+  --color-secondary: #9a8c2c;      /* Dourado em vez de roxo */
+  --color-accent: #b7410e;         /* Bronze/vermelho */
+
+  --color-border: rgba(196, 180, 84, 0.3);
+  --color-border-light: rgba(0, 0, 0, 0.05);
+
+  --color-shadow: rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 768px) {
+  :root {
+    --space-xl: 1.5rem;
+    --space-xxl: 2rem;
+    --space-xxxl: 3rem;
+    --space-huge: 4rem;
+
+    --font-size-4xl: 2.5rem;
+    --font-size-5xl: 3rem;
+
+    --container-padding: var(--container-padding-mobile);
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  :root {
+    --font-size-base: 0.9375rem; /* 15px */
+    --font-size-md: 1.0625rem;   /* 17px */
+    --font-size-lg: 1.125rem;    /* 18px */
+    --font-size-xl: 1.25rem;     /* 20px */
+    --font-size-2xl: 1.5rem;     /* 24px */
+    --font-size-3xl: 1.875rem;   /* 30px */
+    --font-size-4xl: 2.25rem;    /* 36px */
+  }
 }

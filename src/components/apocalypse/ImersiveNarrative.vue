@@ -1,5 +1,5 @@
 <template>
-  <div class="immersive-narrative" :class="{ 'fullscreen': isFullscreen }">
+  <div class="immersive-narrative" :class="{ 'fullscreen-mode': isFullscreen }">
     <!-- Camada de background com imagem -->
     <div class="narrative-background">
       <transition name="fade" mode="out-in">
@@ -8,7 +8,7 @@
           :alt="currentSlide.title"
           :key="currentSlide.backgroundImage"
           class="background-image"
-          @load="imageLoaded = true"
+          @load="handleImageLoad"
         >
       </transition>
       <div class="overlay" :class="currentSlide.overlayClass"></div>
@@ -35,32 +35,37 @@
       </div>
 
       <!-- Conteúdo do slide atual -->
-      <div
-        class="slide-container"
-        v-touch:tap="isTypingComplete ? null : completeTyping"
-      >
+      <div class="slide-container">
         <transition name="fade" mode="out-in">
           <div :key="currentIndex" class="slide-content">
             <h3 v-if="currentSlide.title" class="slide-title">{{ currentSlide.title }}</h3>
 
-            <!-- Renderiza texto narrativo com efeito de digitação -->
+            <!-- Texto narrativo com legenda clara -->
             <div class="narrative-text">
-              <span
-                v-for="(line, lineIndex) in formattedText"
-                :key="lineIndex"
-                class="text-line"
-              >
-                <template v-if="isTypingComplete || typingLineIndex > lineIndex">
+              <div class="text-container">
+                <p
+                  v-for="(line, lineIndex) in formattedText"
+                  :key="lineIndex"
+                  class="text-line"
+                >
                   {{ line }}
-                </template>
-                <template v-else-if="typingLineIndex === lineIndex">
-                  {{ line.substring(0, typingCharIndex) }}
-                  <span class="typing-cursor">|</span>
-                </template>
-              </span>
+                </p>
+              </div>
             </div>
           </div>
         </transition>
+      </div>
+
+      <!-- Controles de áudio (visíveis apenas se o áudio estiver disponível) -->
+      <div v-if="hasAudio" class="audio-controls">
+        <button
+          class="audio-btn"
+          @click="toggleAudio"
+          :aria-label="isAudioPlaying ? 'Pausar narração' : 'Reproduzir narração'"
+        >
+          <span class="audio-icon">{{ isAudioPlaying ? '⏸' : '▶️' }}</span>
+          {{ isAudioPlaying ? 'Pausar narração' : 'Reproduzir narração' }}
+        </button>
       </div>
 
       <!-- Controles de navegação -->
@@ -69,24 +74,14 @@
           v-if="currentIndex > 0"
           class="nav-btn prev-btn"
           @click="previousSlide"
-          :disabled="isTyping && !isTypingComplete"
         >
           <span class="nav-arrow">←</span> Anterior
-        </button>
-
-        <button
-          v-if="isTyping && !isTypingComplete"
-          class="nav-btn skip-btn"
-          @click="completeTyping"
-        >
-          Pular Digitação
         </button>
 
         <button
           v-if="currentIndex < slides.length - 1"
           class="nav-btn next-btn"
           @click="nextSlide"
-          :disabled="isTyping && !isTypingComplete"
         >
           Próximo <span class="nav-arrow">→</span>
         </button>
@@ -95,7 +90,6 @@
           v-else
           class="nav-btn complete-btn"
           @click="completeBlock"
-          :disabled="isTyping && !isTypingComplete"
         >
           Continuar <span class="nav-arrow">→</span>
         </button>
@@ -129,15 +123,19 @@ export default {
     },
     typingSpeed: {
       type: Number,
-      default: 40 // ms por caractere
+      default: 0 // Definido como 0 para desativar o efeito de digitação
     },
     autoStartTyping: {
       type: Boolean,
-      default: true
+      default: false // Desativado por padrão
     },
     autoFullscreen: {
       type: Boolean,
-      default: true
+      default: false // Desativado por padrão
+    },
+    audioSrc: {
+      type: String,
+      default: '' // Caminho para o arquivo de áudio, se disponível
     }
   },
   data() {
@@ -145,16 +143,14 @@ export default {
       currentIndex: 0,
       isFullscreen: false,
       imageLoaded: false,
-      // Controle do efeito de digitação
-      isTyping: false,
-      isTypingComplete: false,
-      typingLineIndex: 0,
-      typingCharIndex: 0,
-      typingTimeout: null,
+      isAudioPlaying: false,
+      audioPlayer: null,
+
       // Controle de zoom
       scale: 1,
       startDistance: 0,
       isPinching: false,
+
       // Controle de gestos
       touchStartX: 0,
       touchEndX: 0
@@ -168,14 +164,24 @@ export default {
       // Garante que o texto seja um array de linhas
       const text = this.currentSlide.text || ''
       return Array.isArray(text) ? text : [text]
+    },
+    hasAudio() {
+      // Verifica se o slide atual tem um arquivo de áudio associado
+      return !!this.audioSrc || (this.currentSlide.audioSrc && this.currentSlide.audioSrc.length > 0)
+    },
+    currentAudioSrc() {
+      // Prioriza o áudio específico do slide, senão usa o áudio geral
+      return (this.currentSlide.audioSrc) || this.audioSrc
     }
   },
   watch: {
     currentIndex() {
-      // Resetar estado de digitação quando muda de slide
-      this.resetTyping()
-      if (this.autoStartTyping) {
-        this.startTyping()
+      // Ao mudar de slide, pausar o áudio atual se estiver tocando
+      this.pauseAudio();
+
+      // Se houver áudio para o novo slide e a reprodução automática estiver ativada, iniciar
+      if (this.hasAudio && this.autoPlayAudio) {
+        this.playAudio();
       }
     }
   },
@@ -244,48 +250,49 @@ export default {
       // Detectar quando o usuário sai do modo tela cheia usando Esc
       this.isFullscreen = !!document.fullscreenElement
     },
-    // Métodos para o efeito de digitação
-    startTyping() {
-      // Inicia o efeito de digitação
-      this.isTyping = true
-      this.isTypingComplete = false
-      this.typingLineIndex = 0
-      this.typingCharIndex = 0
-      this.typeNextChar()
-    },
-    typeNextChar() {
-      if (!this.isTyping) return
 
-      const currentText = this.formattedText[this.typingLineIndex] || ''
-
-      if (this.typingCharIndex < currentText.length) {
-        // Continua digitando caracteres na linha atual
-        this.typingCharIndex++
-        this.typingTimeout = setTimeout(this.typeNextChar, this.typingSpeed)
-      } else if (this.typingLineIndex < this.formattedText.length - 1) {
-        // Move para a próxima linha
-        this.typingLineIndex++
-        this.typingCharIndex = 0
-        this.typingTimeout = setTimeout(this.typeNextChar, this.typingSpeed * 3) // Pausa maior entre linhas
-      } else {
-        // Completou a digitação de todas as linhas
-        this.isTypingComplete = true
-        this.isTyping = false
+    // Controle de áudio
+    initializeAudio() {
+      if (this.hasAudio) {
+        this.audioPlayer = new Audio(this.currentAudioSrc);
+        this.audioPlayer.addEventListener('ended', this.handleAudioEnded);
       }
     },
-    completeTyping() {
-      // Parar a animação de digitação e mostrar o texto completo
-      clearTimeout(this.typingTimeout)
-      this.isTypingComplete = true
-      this.isTyping = false
+
+    playAudio() {
+      if (this.audioPlayer && !this.isAudioPlaying) {
+        this.audioPlayer.play()
+          .then(() => {
+            this.isAudioPlaying = true;
+          })
+          .catch(error => {
+            console.error('Erro ao reproduzir áudio:', error);
+          });
+      }
     },
-    resetTyping() {
-      // Resetar o estado de digitação
-      clearTimeout(this.typingTimeout)
-      this.isTyping = false
-      this.isTypingComplete = false
-      this.typingLineIndex = 0
-      this.typingCharIndex = 0
+
+    pauseAudio() {
+      if (this.audioPlayer && this.isAudioPlaying) {
+        this.audioPlayer.pause();
+        this.isAudioPlaying = false;
+      }
+    },
+
+    toggleAudio() {
+      if (this.isAudioPlaying) {
+        this.pauseAudio();
+      } else {
+        this.playAudio();
+      }
+    },
+
+    handleAudioEnded() {
+      this.isAudioPlaying = false;
+    },
+
+    // Método para tratar o carregamento de imagem
+    handleImageLoad() {
+      this.imageLoaded = true;
     },
 
     // Métodos para controlar gestos
@@ -356,45 +363,49 @@ export default {
   },
   mounted() {
     // Adicionar listeners para eventos de mudança no modo tela cheia
-    document.addEventListener('fullscreenchange', this.handleFullscreenChange)
-    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange)
-    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange)
-    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange)
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange);
 
-    // Iniciar digitação automática se habilitada
-    if (this.autoStartTyping) {
-      this.startTyping()
-    }
+    // Inicializar áudio se disponível
+    this.initializeAudio();
 
-    // Entrar automaticamente em modo tela cheia
+    // Entrar automaticamente em modo tela cheia se configurado
     if (this.autoFullscreen) {
       // Pequeno atraso para garantir que o DOM esteja pronto
       setTimeout(() => {
-        this.enterFullscreen()
-      }, 300)
+        this.enterFullscreen();
+      }, 300);
     }
 
     // Adicionar eventos de touch para gestos de zoom e swipe
-    this.$el.addEventListener('touchstart', this.handleTouchStart, { passive: false })
-    this.$el.addEventListener('touchmove', this.handleTouchMove, { passive: false })
-    this.$el.addEventListener('touchend', this.handleTouchEnd, { passive: false })
+    this.$el.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+    this.$el.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+    this.$el.addEventListener('touchend', this.handleTouchEnd, { passive: false });
   },
   beforeUnmount() {
-    // Limpar timeouts e remover event listeners
-    clearTimeout(this.typingTimeout)
-    document.removeEventListener('fullscreenchange', this.handleFullscreenChange)
-    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange)
-    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange)
-    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange)
+    // Limpar e remover event listeners
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange);
 
     // Remover eventos de touch
-    this.$el.removeEventListener('touchstart', this.handleTouchStart)
-    this.$el.removeEventListener('touchmove', this.handleTouchMove)
-    this.$el.removeEventListener('touchend', this.handleTouchEnd)
+    this.$el.removeEventListener('touchstart', this.handleTouchStart);
+    this.$el.removeEventListener('touchmove', this.handleTouchMove);
+    this.$el.removeEventListener('touchend', this.handleTouchEnd);
+
+    // Parar e limpar reprodução de áudio
+    if (this.audioPlayer) {
+      this.audioPlayer.pause();
+      this.audioPlayer.removeEventListener('ended', this.handleAudioEnded);
+      this.audioPlayer = null;
+    }
 
     // Sair do modo tela cheia ao desmontar
     if (this.isFullscreen) {
-      this.exitFullscreen()
+      this.exitFullscreen();
     }
   }
 }
@@ -416,7 +427,7 @@ export default {
   touch-action: pan-x pan-y;
 }
 
-.fullscreen {
+.fullscreen-mode {
   height: 100vh;
   border-radius: 0;
   z-index: 9999;
@@ -546,29 +557,65 @@ export default {
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
+/* Estilo melhorado para o texto narrativo */
 .narrative-text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  font-family: var(--font-family-quote);
-  font-size: 1.4rem;
-  line-height: 1.6;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  margin-top: 1rem;
+}
+
+.text-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  max-width: 90%;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .text-line {
-  display: block;
+  font-family: var(--font-family-quote);
+  font-size: 1.3rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--color-text);
 }
 
-.typing-cursor {
-  display: inline-block;
-  animation: blink 1s step-end infinite;
+.text-line:last-child {
+  margin-bottom: 0;
 }
 
-@keyframes blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
+/* Controles de áudio */
+.audio-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.audio-btn {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.audio-btn:hover {
+  background-color: rgba(75, 46, 131, 0.7);
+  transform: translateY(-2px);
+}
+
+.audio-icon {
+  font-size: 1.2rem;
 }
 
 /* Controles de navegação */
@@ -592,7 +639,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 100px; /* Garantir área mínima de toque */
+  min-width: 120px; /* Garantir área mínima de toque */
   justify-content: center;
 }
 
@@ -688,19 +735,18 @@ export default {
     font-size: 1.4rem;
   }
 
-  .narrative-text {
+  .text-line {
     font-size: 1.1rem;
   }
 
   .narrative-controls {
-    flex-direction: row; /* Manter botões lado a lado em mobile */
-    flex-wrap: wrap; /* Permitir quebra de linha se necessário */
+    flex-direction: column; /* Empilhar botões em mobile */
     gap: 0.5rem;
   }
 
   .nav-btn {
-    flex: 1;
-    min-width: 0; /* Permitir que os botões se ajustem ao espaço disponível */
+    width: 100%; /* Botões ocupam toda a largura */
+    min-width: 0; /* Reset do min-width */
     font-size: 0.9rem;
     padding: 0.7rem 1rem;
   }
@@ -712,17 +758,29 @@ export default {
     padding: 7px;
     margin: -7px;
   }
+
+  .text-container {
+    max-width: 95%;
+  }
 }
 
 /* Especificamente para telas muito pequenas */
 @media (max-width: 375px) {
-  .narrative-controls {
-    flex-direction: column; /* Empilhar botões em telas muito pequenas */
-    width: 100%;
+  .narrative-content {
+    padding: 0.8rem;
   }
 
-  .nav-btn {
-    width: 100%;
+  .block-title {
+    font-size: 1.4rem;
+  }
+
+  .text-line {
+    font-size: 1rem;
+  }
+
+  .slide-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
   }
 }
 </style>

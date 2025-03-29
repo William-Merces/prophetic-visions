@@ -1,0 +1,293 @@
+/* immersiveAnimations.css - Estilos para animações e efeitos visuais na experiência imersiva */
+
+/* Animação para as estrelas de fundo */
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: twinkle var(--transition-slow) infinite alternate;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Animações padrão para elementos */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px rgba(196, 180, 84, 0.5);
+    text-shadow: 0 0 10px rgba(196, 180, 84, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(196, 180, 84, 0.8);
+    text-shadow: 0 0 20px rgba(196, 180, 84, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(196, 180, 84, 0.5);
+    text-shadow: 0 0 10px rgba(196, 180, 84, 0.5);
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Classes de utilidade para animações */
+.anim-fade-in {
+  animation: fadeIn 1s forwards;
+}
+
+.anim-fade-out {
+  animation: fadeOut 1s forwards;
+}
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.8s forwards;
+}
+
+.anim-fade-in-down {
+  animation: fadeInDown 0.8s forwards;
+}
+
+.anim-scale-up {
+  animation: scaleUp 0.5s forwards;
+}
+
+.anim-slide-in-up {
+  animation: slideInUp 0.8s forwards;
+}
+
+.anim-glow {
+  animation: glow 3s infinite;
+}
+
+.anim-pulse {
+  animation: pulse 2s infinite;
+}
+
+.anim-rotate {
+  animation: rotate 20s linear infinite;
+}
+
+/* Efeitos especiais para momentos específicos nas visões */
+.holy-light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 253, 230, 0.4) 0%, rgba(255, 253, 230, 0) 70%);
+  pointer-events: none;
+  z-index: 2;
+  animation: pulse-light 8s infinite alternate;
+}
+
+.celestial-rays {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 230, 0.1) 0%,
+    rgba(255, 253, 230, 0) 50%,
+    rgba(255, 253, 230, 0.1) 100%
+  );
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
+  animation: rotate 120s linear infinite;
+}
+
+.divine-presence {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 253, 230, 0.2) 0%, transparent 70%);
+  animation: pulse-presence 10s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Animações específicas para elementos de introdução */
+.intro-title {
+  animation: fadeInDown 1.2s ease;
+}
+
+.intro-subtitle {
+  animation: fadeInUp 1.2s ease 0.3s both;
+}
+
+.intro-text {
+  animation: fadeIn 1.2s ease 0.6s both;
+}
+
+.intro-action {
+  animation: fadeIn 1.2s ease 0.9s both;
+}
+
+/* Transições Vue.js */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slide-horizontal-enter-active,
+.slide-horizontal-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.slide-horizontal-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.slide-horizontal-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.zoom-enter-active,
+.zoom-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.zoom-enter-from,
+.zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Estilos específicos para telas de capa */
+.cover-title {
+  animation: fadeInDown 1s ease;
+}
+
+.cover-tagline {
+  animation: fadeInUp 1s ease 0.3s both;
+}
+
+.cover-icon {
+  animation: pulse 4s infinite;
+}
+
+.cover-action {
+  animation: fadeIn 1s ease 0.6s both;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .holy-light,
+  .celestial-rays,
+  .divine-presence {
+    opacity: 0.7; /* Reduzir intensidade em telas menores */
+  }
+}

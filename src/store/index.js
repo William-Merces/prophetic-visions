@@ -1,20 +1,29 @@
-// src/store/index.js
 import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    availableBooks: [
-      { id: 'apocalypse', name: 'Apocalipse', available: true, totalChapters: 22 }
-    ]
+    availableChapters: [1]
   },
-
   getters: {
-    getAvailableBooks: (state) => {
-      return state.availableBooks
-    },
+    isChapterAvailable: (state) => (chapterNum) => {
+      return state.availableChapters.includes(Number(chapterNum))
+    }
+  },
+  mutations: {
+    completeChapter(state, chapterNum) {
+      if (!state.availableChapters.includes(Number(chapterNum))) {
+        state.availableChapters.push(Number(chapterNum))
+      }
 
-    getBookById: (state) => (id) => {
-      return state.availableBooks.find(book => book.id === id)
+      // Se o próximo capítulo não estiver disponível, adicione-o
+      if (!state.availableChapters.includes(Number(chapterNum) + 1)) {
+        state.availableChapters.push(Number(chapterNum) + 1)
+      }
+    }
+  },
+  actions: {
+    markChapterAsCompleted({ commit }, chapterNum) {
+      commit('completeChapter', chapterNum)
     }
   }
 })
